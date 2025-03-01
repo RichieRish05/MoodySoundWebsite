@@ -1,13 +1,25 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
-
+import torch
+from services import load_model
 
 app = Flask(__name__)
 CORS(app)
 
+
+# Init the model
+model = load_model()
+
 @app.get('/hello')
 def hello():
     return jsonify({'message': 'Hello, world!'})
+
+
+@app.get('/mood')
+def predict_mood():
+    with torch.no_grad():
+        pass
+
 
 
 if __name__ == '__main__':
