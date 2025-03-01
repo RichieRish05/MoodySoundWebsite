@@ -3,3 +3,6 @@ backend/myenv
 
 # Ignore environment variables
 .env
+
+# Ignore all pth files
+*.pth
