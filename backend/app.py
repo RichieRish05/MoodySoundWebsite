@@ -1,7 +1,7 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import torch
-from services import load_model
+from services import load_model, get_song_preview, get_spectrogram_data, get_spectrogram
 
 app = Flask(__name__)
 CORS(app)
@@ -17,8 +17,27 @@ def hello():
 
 @app.get('/mood')
 def predict_mood():
+    # Get the artist
+    artist = request.args.get('artist')
+    song = request.args.get('song')
+
+    # Get the song preview
+    audio_url = get_song_preview(song)
+
+    # Get the spectrogram
+    if audio_url is None:
+        return jsonify({'error': 'No audio URL found'}), 404
+    
+    # Get the spectrogram
+    spectrogram = get_spectrogram_data(audio_url)
+
+    # Get the mood prediction
     with torch.no_grad():
-        pass
+        mood = model(spectrogram)
+
+    return jsonify({'mood': mood})
+
+
 
 
 
