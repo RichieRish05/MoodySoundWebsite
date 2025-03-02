@@ -52,7 +52,17 @@ const fetchPlaybackState = async (spotifyApi: SpotifyWebApi.SpotifyWebApiJs): Pr
 }
 
 
+const arePlaybackStatesEqual = (state1: PlaybackState | null, state2: PlaybackState | null): boolean => {
+    // If both states are null, they're equal
+    if (state1 === null && state2 === null) return true;
+    // If only one state is null, they're not equal
+    if (state1 === null || state2 === null) return false;
 
+    return (state1.songName === state2.songName &&
+        state1.artistName === state2.artistName &&
+        state1.albumName === state2.albumName &&
+        state1.imageUrl === state2.imageUrl)
+}
 
 
 
@@ -72,20 +82,19 @@ const CallbackPage: React.FC = () => {
 
             const intervalId = setInterval(async () => {
                 const newPlaybackState = await fetchPlaybackState(spotifyApi);
-                if (newPlaybackState !== playbackState) {
+                if (!arePlaybackStatesEqual(playbackState, newPlaybackState)) {
+                    console.log('PLAYBACK STATE CHANGED');
                     setPlaybackState(newPlaybackState);
-                    console.log(newPlaybackState);
                 }
             }, 1000);
 
             return () => clearInterval(intervalId);
         }
 
-    }, [spotifyToken])
+    }, [spotifyToken, playbackState])
 
 
     useEffect(() => {
-        console.log('ACCESSED MOOD CHANGE');
 
         const fetchMood = async (songName, artistName) => {
             const mood = await axios.get(`${BACKEND_URL}/mood?song=${songName}&artist=${artistName}`)
