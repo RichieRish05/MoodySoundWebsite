@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -40,3 +43,89 @@
 .read-the-docs {
   color: #888;
 }
+
+
+/* led-text.css */
+.led-text {
+  /* Basic styling (optional) */
+  font-size: 5rem;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 2rem;
+  /* 
+   * Apply the animation:
+   * - led-fade is the keyframes name (defined below)
+   * - 5s is the duration
+   * - infinite means it repeats forever
+   * - ease-in-out provides a smooth transition between color changes
+   */
+  animation: led-fade 10s infinite ease-in-out;
+}
+
+@keyframes led-fade {
+  0% {
+    color: red;
+  }
+  25% {
+    color: green;
+  }
+  50% {
+    color: blue;
+  }
+  75% {
+    color: yellow;
+  }
+  100% {
+    color: red;
+  }
+}
+
+
+@keyframes rainbow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.shimmer-text {
+  font-size: 60px;
+  font-weight: bold;
+  text-transform: uppercase;
+  background-image: linear-gradient(45deg, 
+    #db0000, #FF4500, #DAA520, #006400, #008B8B, #00008B, #4B0082, #8B0000);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rainbow 5s linear infinite;
+}
+
+
+/* Spotify brand green button */
+.spotify-button {
+  background-color: #000000; /* Spotify Green */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+/* Hover effect for the button */
+.spotify-button:hover {
+  background-color: #636363; /* Slightly lighter green on hover */
+}
+
+/* Logo dimensions and spacing */
+.spotify-logo {
+  width: 25px;
+  height: 25px;
+  margin-right: 0.75rem;
+}
+
+

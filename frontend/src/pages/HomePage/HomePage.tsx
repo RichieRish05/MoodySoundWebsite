@@ -1,5 +1,5 @@
-
-
+import './HomePage.css';
+import Starfield from '../../components/starfield';
 
 
 const HomePage = () => {
@@ -17,9 +17,19 @@ const HomePage = () => {
   };
 
   return (
-    <button onClick={handleLogin}>
-      Login with Spotify
-    </button>
+    <div className="container d-flex flex-column align-items-center justify-content-center">
+
+      <h1 className="shimmer-text text-center fixed-top mt-5">Welcome to Moodify</h1>
+
+      <div onClick={handleLogin} className="spotify-button" style={{position: 'relative', zIndex: 1}} >
+        <img src="/spotify-logo.png" alt="Spotify Logo" className="spotify-logo" />
+        Login with Spotify
+      </div>
+
+      <Starfield />
+    </div>
+
+
   );
 };
 

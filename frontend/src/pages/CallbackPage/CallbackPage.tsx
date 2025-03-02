@@ -1,11 +1,23 @@
 import { useEffect, useState } from 'react';
 import SpotifyWebApi from 'spotify-web-api-js';
 import axios from 'axios';
-
+import './CallbackPage.css';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL 
 
-const getTokenFromUrl = () => {
+interface PlaybackState {
+    songName: string;
+    artistName: string;
+    albumName: string;
+    imageUrl: string;
+}
+
+interface TokenResponse {
+    access_token?: string;
+    [key: string]: string | undefined;
+}
+
+const getTokenFromUrl = (): TokenResponse => {
     return window.location.hash
         .substring(1)
         .split('&')
@@ -16,7 +28,7 @@ const getTokenFromUrl = () => {
         }, {});
 }
 
-const parsePlaybackState = (playbackState) => {
+const parsePlaybackState = (playbackState: any): PlaybackState | null => {
 
     if (playbackState.currently_playing_type === 'track') {
         return {
@@ -32,7 +44,7 @@ const parsePlaybackState = (playbackState) => {
     
 }
 
-const fetchPlaybackState = async (spotifyApi) => {
+const fetchPlaybackState = async (spotifyApi: SpotifyWebApi.SpotifyWebApiJs): Promise<PlaybackState | null> => {
     let res = await spotifyApi.getMyCurrentPlaybackState();
     res = parsePlaybackState(res)
 
@@ -45,11 +57,11 @@ const fetchPlaybackState = async (spotifyApi) => {
 
 
 
-const CallbackPage = () => {
+const CallbackPage: React.FC = () => {
     const spotifyApi = new SpotifyWebApi();
-    const [spotifyToken, setSpotifyToken] = useState(null);
-    const [playbackState, setPlaybackState] = useState(null);
-    const [mood, setMood] = useState(null);
+    const [spotifyToken, setSpotifyToken] = useState<string | null>(null);
+    const [playbackState, setPlaybackState] = useState<PlaybackState | null>(null);
+    const [mood, setMood] = useState<number[] | null>(null);
     
     
     useEffect(() => {

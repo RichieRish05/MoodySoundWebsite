@@ -7,8 +7,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
 
-import HomePage from './pages/HomePage'
-import CallbackPage from './pages/CallbackPage';
+import HomePage from './pages/HomePage/HomePage'
+import CallbackPage from './pages/CallbackPage/CallbackPage';
 
 function App() {
 
