@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react';
 import SpotifyWebApi from 'spotify-web-api-js';
+import axios from 'axios';
+
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL 
 
 const getTokenFromUrl = () => {
     return window.location.hash
@@ -40,11 +44,12 @@ const fetchPlaybackState = async (spotifyApi) => {
 
 
 
+
 const CallbackPage = () => {
     const spotifyApi = new SpotifyWebApi();
     const [spotifyToken, setSpotifyToken] = useState(null);
     const [playbackState, setPlaybackState] = useState(null);
-
+    const [mood, setMood] = useState(null);
     
     
     useEffect(() => {
@@ -54,16 +59,43 @@ const CallbackPage = () => {
             spotifyApi.setAccessToken(tokens.access_token);
 
             const intervalId = setInterval(async () => {
-                const playbackState = await fetchPlaybackState(spotifyApi);
-                setPlaybackState(playbackState);
-                console.log(playbackState);
+                const newPlaybackState = await fetchPlaybackState(spotifyApi);
+                if (newPlaybackState !== playbackState) {
+                    setPlaybackState(newPlaybackState);
+                    console.log(newPlaybackState);
+                }
             }, 1000);
 
             return () => clearInterval(intervalId);
         }
 
-
     }, [spotifyToken])
+
+
+    useEffect(() => {
+        console.log('ACCESSED MOOD CHANGE');
+
+        const fetchMood = async (songName, artistName) => {
+            const mood = await axios.get(`${BACKEND_URL}/mood?song=${songName}&artist=${artistName}`)
+                .then((res) => {
+                    console.log(res.data.mood);
+                    return res.data.mood;
+                })
+                .catch((err) => {
+                    console.error(err);
+                    return null;
+                });
+
+            return mood;
+        }
+
+        if (playbackState) {
+            const mood = fetchMood(playbackState.songName, playbackState.artistName)
+            if (mood) {
+                setMood(mood);
+            }
+        }
+    }, [playbackState])
 
 
 

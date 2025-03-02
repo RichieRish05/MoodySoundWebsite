@@ -20,9 +20,14 @@ def predict_mood():
     # Get the artist
     artist = request.args.get('artist')
     song = request.args.get('song')
+    search_query = f"{song} {artist}"
+
 
     # Get the song preview
-    audio_url = get_song_preview(song)
+    audio_url = get_song_preview(search_query)
+
+
+
 
     # Get the spectrogram
     if audio_url is None:
@@ -35,7 +40,9 @@ def predict_mood():
     with torch.no_grad():
         mood = model(spectrogram)
 
-    return jsonify({'mood': mood})
+    print(mood.tolist())
+
+    return jsonify({'mood': mood.tolist()})
 
 
 

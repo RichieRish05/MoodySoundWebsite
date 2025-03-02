@@ -3,6 +3,7 @@ import requests
 import librosa
 import numpy as np
 import tempfile
+import torch
 
 
 
@@ -33,22 +34,21 @@ def get_spectrogram_data(audio_url, sr=22050, duration=30):
 
 
 def get_spectrogram(y, sr=22050, min_duration=10, max_duration=30, step=10):
-
     # Target length in samples (30 seconds)
     target_length = sr * max_duration  
 
-
-    # Format the audio to a standard shape
-    audio = np.pad(audio, (0, max(0, target_length - len(audio))), mode='constant')[:target_length]
+    # Format the audio to a standard shape (use y instead of audio)
+    y = np.pad(y, (0, max(0, target_length - len(y))), mode='constant')[:target_length]
 
     # Generate a Mel spectrogram based on the sliced audio
-    S = librosa.feature.melspectrogram(y=audio, sr=sr, n_mels=128, fmax=8000, dtype=np.float16)
+    S = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128, fmax=8000, dtype=np.float16)
 
     # Convert power to decibels
     S_db = librosa.power_to_db(S, ref=np.max)
-
     
-    return np.array(S_db)
+    S_db = np.array(S_db)
+
+    return torch.FloatTensor(S_db).unsqueeze(0).unsqueeze(0)
         
 
 
@@ -58,21 +58,5 @@ def get_spectrogram(y, sr=22050, min_duration=10, max_duration=30, step=10):
 __all__ = [get_spectrogram_data.__name__, get_spectrogram.__name__]
 
 
-"""
-#Search for the audio file
-audio_url = get_song_preview("Hello")
-print(audio_url)
-
-spectrograms = get_spectrogram_data(audio_url)
-
-for s in spectrograms:
-    print(s.shape)
-
-
-import sounddevice as sd
-
-sd.play(audio, samplerate=sr)
-sd.wait()  # Wait until the audio finishes playing
-"""
 
 
