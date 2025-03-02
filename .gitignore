@@ -1,5 +1,6 @@
-# Ignore python virtual env
+# Ignore python virtual envs
 backend/myenv
+.venv
 
 # Ignore environment variables
 .env

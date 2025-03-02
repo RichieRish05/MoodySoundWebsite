@@ -8,7 +8,7 @@ CORS(app)
 
 
 # Init the model
-model = load_model()
+#model = load_model()
 
 @app.get('/hello')
 def hello():
