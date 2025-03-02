@@ -72,6 +72,7 @@ const CallbackPage: React.FC = () => {
     const [spotifyToken, setSpotifyToken] = useState<string | null>(null);
     const [playbackState, setPlaybackState] = useState<PlaybackState | null>(null);
     const [mood, setMood] = useState<number[] | null>(null);
+    const [color, setColor] = useState<string | null>(null);
     
     
     useEffect(() => {
