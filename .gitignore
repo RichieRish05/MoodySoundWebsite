@@ -3,7 +3,16 @@ backend/myenv
 .venv
 
 # Ignore environment variables
-.env
+*.env
 
 # Ignore all pth files
 *.pth
+
+# Ignore all pycache files
+__pycache__
+
+# Ignore all node_modules
+node_modules
+
+# Ignore all dist files
+dist

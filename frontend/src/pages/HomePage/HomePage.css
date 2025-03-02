@@ -1,10 +1,117 @@
-body {
-    background: linear-gradient(45deg, #ff9a9e, #fad0c4);
-    background-size: cover;
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+/* Move all the specific styles here */
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+.led-text {
+  font-size: 5rem;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 2rem;
+  animation: led-fade 10s infinite ease-in-out;
+}
+
+@keyframes led-fade {
+  0% { color: red; }
+  25% { color: green; }
+  50% { color: blue; }
+  75% { color: yellow; }
+  100% { color: red; }
+}
+
+@keyframes rainbow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.shimmer-text {
+  font-size: 60px;
+  font-weight: bold;
+  text-transform: uppercase;
+  background-image: linear-gradient(45deg, 
+    #db0000, #FF4500, #DAA520, #006400, #008B8B, #00008B, #4B0082, #8B0000);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rainbow 5s linear infinite;
+}
+
+.spotify-button {
+  background-color: #000000;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.spotify-button:hover {
+  background-color: #636363;
+}
+
+.spotify-logo {
+  width: 25px;
+  height: 25px;
+  margin-right: 0.75rem;
+}
+
+.home-page-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 100vh;
+    background-image: linear-gradient(45deg, 
+    #e57373, #f0a07e, #d6b988, #81c784, #64b5f6, #7986cb, #ba68c8, #f48fb1);
+    background-size: 300% 300%;
     animation: hueRotate 20s linear infinite;
+    z-index: 0;
   }
   
-@keyframes hueRotate {
+  @keyframes hueRotate {
     0% {
       filter: hue-rotate(0deg);
     }
@@ -12,3 +119,11 @@ body {
       filter: hue-rotate(360deg);
     }
 }
+  
+  @keyframes rainbow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+  }
+
+

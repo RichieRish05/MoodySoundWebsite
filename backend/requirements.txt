@@ -6,5 +6,6 @@ librosa
 flask
 flask-cors
 requests
+webcolors
 
 

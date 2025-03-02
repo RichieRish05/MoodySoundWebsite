@@ -69,10 +69,12 @@ const arePlaybackStatesEqual = (state1: PlaybackState | null, state2: PlaybackSt
 
 const CallbackPage: React.FC = () => {
     const spotifyApi = new SpotifyWebApi();
+
+
     const [spotifyToken, setSpotifyToken] = useState<string | null>(null);
     const [playbackState, setPlaybackState] = useState<PlaybackState | null>(null);
     const [mood, setMood] = useState<number[] | null>(null);
-    const [color, setColor] = useState<string | null>(null);
+    const [color, setColor] = useState<string | null>("#FFFFFF");
     
     
     useEffect(() => {
@@ -95,13 +97,14 @@ const CallbackPage: React.FC = () => {
     }, [spotifyToken, playbackState])
 
 
-    useEffect(() => {
 
+    useEffect(() => {
         const fetchMood = async (songName, artistName) => {
             const mood = await axios.get(`${BACKEND_URL}/mood?song=${songName}&artist=${artistName}`)
                 .then((res) => {
-                    console.log(res.data.mood);
-                    return res.data.mood;
+                    console.log(res.data);
+                    return res.data;
+
                 })
                 .catch((err) => {
                     console.error(err);
@@ -112,20 +115,39 @@ const CallbackPage: React.FC = () => {
         }
 
         if (playbackState) {
-            const mood = fetchMood(playbackState.songName, playbackState.artistName)
-            if (mood) {
-                setMood(mood);
-            }
+            const fetchAndSetMood = async () => {
+                const mood = await fetchMood(playbackState.songName, playbackState.artistName);
+                if (mood) {
+                    setMood(mood.moods);
+                    setColor(mood.color);
+                }
+            };
+            fetchAndSetMood();
         }
     }, [playbackState])
+
+
+    useEffect(() => {
+        document.body.style.transition = 'background-color 0.5s ease';
+
+        document.body.style.backgroundColor = color || "#FFFFFF";
+
+        return () => {
+            document.body.style.backgroundColor = '';
+            document.body.style.transition = '';
+        };
+    }, [color]);
 
 
 
 
 
     return (
-        <div>
+        <div className="vh-100 d-flex flex-column align-items-center justify-content-center">
             <h1>Welcome</h1>
+
+            {mood && <h2>Mood: {mood.join(', ')}</h2>}
+
             {playbackState && (
                 <div>
                     <img src={playbackState.imageUrl} alt="album cover" />

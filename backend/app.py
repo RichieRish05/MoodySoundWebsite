@@ -1,14 +1,14 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import torch
-from services import load_model, get_song_preview, get_spectrogram_data, get_spectrogram
+from services import load_model, get_song_preview, get_spectrogram_data, get_spectrogram, get_moods_and_colors_from_mood_vector
 
 app = Flask(__name__)
 CORS(app)
 
 
 # Init the model
-#model = load_model()
+model = load_model()
 
 @app.get('/hello')
 def hello():
@@ -40,9 +40,11 @@ def predict_mood():
     with torch.no_grad():
         mood = model(spectrogram)
 
-    print(mood.tolist())
 
-    return jsonify({'mood': mood.tolist()})
+    moods_and_colors = get_moods_and_colors_from_mood_vector(mood.squeeze().squeeze())
+    print(moods_and_colors)
+
+    return jsonify(moods_and_colors)
 
 
 
