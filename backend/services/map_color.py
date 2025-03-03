@@ -5,16 +5,18 @@ from webcolors import rgb_to_hex
 
 # Define mood colors (RGB format)
 MOOD_COLORS = {
-    "danceable":       (177, 156, 217),  # Magenta
-    "mood_acoustic":   (160,  82,  45),  # Sienna
-    "mood_aggressive": (220,  20,  60),  # Crimson
-    "mood_electronic": (  0, 255, 255),  # Cyan
-    "mood_happy":      (255, 223,   0),  # Bright Yellow
-    "mood_party":      (255, 0, 147),  # Deep Pink
-    "mood_relaxed":    ( 34, 139,  34),  # Forest Green
-    "mood_sad":        ( 30, 144, 255),  # Dodger Blue
+    "danceable":       (147,  51, 255),  # Bright Purple
+    "mood_acoustic":   (255, 136,   0),  # Bright Orange
+    "mood_aggressive": (255,   0,   0),  # Pure Red
+    "mood_electronic": (  0, 255, 217),  # Turquoise
+    "mood_happy":      (255, 221,   0),  # Golden Yellow
+    "mood_party":      (255,   0, 255),  # Hot Pink
+    "mood_relaxed":    ( 76, 217,  76),  # Lime Green
+    "mood_sad":        (  0, 128, 255),  # Bright Blue
 }
 
+
+# TRY TAKING ANYTHING ABOVE 0.3 AS A MAJOR MOOD
 
 
 MOOD_POSITIONS = [
@@ -30,58 +32,64 @@ MOOD_POSITIONS = [
 
 
 
-def get_top_two_moods(mood_vector: torch.Tensor):
+def get_significant_moods(mood_vector: torch.Tensor):
+    MAX_VALUE = torch.max(mood_vector)
+
     # Convert mood vector to dictionary
-    mood = {label: float(value) for label, value in zip(MOOD_POSITIONS, mood_vector)}
+    significant_moods = {label: float(value) for label, value in zip(MOOD_POSITIONS, mood_vector) if value > MAX_VALUE * 0.65}
+    sorted_moods = sorted(significant_moods.items(), key=lambda x: x[1], reverse=True)
 
-    # Create a namedtuple to store mood label and value
-    Mood = namedtuple('Mood', ['label', 'value'])
 
-    # Initialize greatest and second greatest moods
-    greatest_mood = Mood(label=None, value=float('-inf'))
-    second_greatest_mood = Mood(label=None, value=float('-inf'))
+    # If both happy and sad are in the significant moods, remove the one with the lower value
+    if 'mood_happy' in significant_moods and 'mood_sad' in significant_moods:
+        mood_happy_value = significant_moods['mood_happy']
+        mood_sad_value = significant_moods['mood_sad']
 
-    # Iterate through moods and update greatest and second greatest moods
-    for mood, value in mood.items():
-        if value > greatest_mood.value:
-            second_greatest_mood = greatest_mood
-            greatest_mood = Mood(label=mood, value=value)
-        elif value > second_greatest_mood.value:
-            second_greatest_mood = Mood(label=mood, value=value)
+        if mood_happy_value > mood_sad_value:
+            significant_moods.pop('mood_sad')
+        else:
+            significant_moods.pop('mood_happy')
 
-    return greatest_mood, second_greatest_mood
+
+    return significant_moods
+
 
 
 
 def get_moods_and_colors_from_mood_vector(mood_vector: torch.Tensor) -> dict:
-    greatest_mood, second_greatest_mood = get_top_two_moods(mood_vector)
-
-    weight1 = max(greatest_mood.value*2, 0.5)
-    weight2 = max(second_greatest_mood.value*2, 0.5)
-
-
-    # If one of the moods is aggressive, return red
-    if greatest_mood.label == "mood_aggressive" or second_greatest_mood.label == "mood_aggressive":
-        return {
-            "moods": [greatest_mood.label, second_greatest_mood.label],
-            "color": rgb_to_hex((255, 0, 0)),
-            "vector": mood_vector.tolist()
-        }
+    significant_moods = get_significant_moods(mood_vector)
 
 
     # Return the weighted, blended color of the two moods and the moods themselves
     return {
-        "moods": [greatest_mood.label, second_greatest_mood.label],
-        "color": rgb_to_hex(blend_colors(MOOD_COLORS[greatest_mood.label], MOOD_COLORS[second_greatest_mood.label], weight1, weight2)),
+        "significant_moods": list(significant_moods.keys()),
+        "color": rgb_to_hex(blend_colors(significant_moods)),
         "vector": mood_vector.tolist()
     }
 
 
-def blend_colors(color1, color2, weight1, weight2):
-    """Blend two RGB colors by averaging their components."""
-    return tuple(int((c1 * weight1 + c2 * weight2) / (weight1 + weight2)) for c1, c2 in zip(color1, color2))
+def blend_colors(moods):
+    """Blend significant moods while preserving color vibrancy."""
+    if len(moods) == 1:
+        return MOOD_COLORS[list(moods.keys())]
+    
+    weights = [0.7, 0.3, 0.2, 0.1, 0.1, 0.1, 0.1, 0.1]
+
+    blended_color = [0,0,0]
+    for mood, index in zip(moods.keys(), range(len(moods))):
+        for i in range(3):
+            blended_color[i] += MOOD_COLORS[mood][i] * weights[index]
+
+    return tuple(int(c) for c in blended_color)
+
+
+    
 
 
 
 
 __all__ = [get_moods_and_colors_from_mood_vector.__name__]
+
+
+if __name__ == "__main__":
+    print(get_moods_and_colors_from_mood_vector(torch.tensor([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])))

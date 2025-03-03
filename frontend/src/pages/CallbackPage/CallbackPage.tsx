@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import SpotifyWebApi from 'spotify-web-api-js';
 import axios from 'axios';
 import './CallbackPage.css';
+import Starfield from '../../components/starfield';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL 
 
@@ -60,8 +61,7 @@ const arePlaybackStatesEqual = (state1: PlaybackState | null, state2: PlaybackSt
 
     return (state1.songName === state2.songName &&
         state1.artistName === state2.artistName &&
-        state1.albumName === state2.albumName &&
-        state1.imageUrl === state2.imageUrl)
+        state1.albumName === state2.albumName)
 }
 
 
@@ -69,34 +69,44 @@ const arePlaybackStatesEqual = (state1: PlaybackState | null, state2: PlaybackSt
 
 const CallbackPage: React.FC = () => {
     const spotifyApi = new SpotifyWebApi();
-
-
     const [spotifyToken, setSpotifyToken] = useState<string | null>(null);
     const [playbackState, setPlaybackState] = useState<PlaybackState | null>(null);
     const [mood, setMood] = useState<number[] | null>(null);
     const [color, setColor] = useState<string | null>("#FFFFFF");
-    
     
     useEffect(() => {
         const tokens = getTokenFromUrl();
         if (tokens.access_token) {
             setSpotifyToken(tokens.access_token);
             spotifyApi.setAccessToken(tokens.access_token);
-
-            const intervalId = setInterval(async () => {
-                const newPlaybackState = await fetchPlaybackState(spotifyApi);
-                if (!arePlaybackStatesEqual(playbackState, newPlaybackState)) {
-                    console.log('PLAYBACK STATE CHANGED');
-                    setPlaybackState(newPlaybackState);
-                }
-            }, 1000);
-
-            return () => clearInterval(intervalId);
         }
+    }, []);
 
-    }, [spotifyToken, playbackState])
-
-
+    useEffect(() => {
+        if (!spotifyToken) return;
+    
+        let lastPlaybackState = playbackState; // Keep track of the last state
+    
+        const updatePlaybackState = async () => {
+            try {
+                const currentPlaybackState = await fetchPlaybackState(spotifyApi);
+                
+                if (!arePlaybackStatesEqual(lastPlaybackState, currentPlaybackState)) {
+                    setPlaybackState(currentPlaybackState);
+                    lastPlaybackState = currentPlaybackState; // Update lastPlaybackState only if it changes
+                }
+            } catch (error) {
+                console.error("Error fetching playback state:", error);
+            }
+        };
+    
+        updatePlaybackState(); // Fetch immediately on mount
+    
+        const intervalId = setInterval(updatePlaybackState, 3000); // Update the playback state every 3 seconds
+    
+        return () => clearInterval(intervalId);
+    }, [spotifyToken]); // Only re-run when spotifyToken changes
+    
 
     useEffect(() => {
         const fetchMood = async (songName, artistName) => {
@@ -118,7 +128,7 @@ const CallbackPage: React.FC = () => {
             const fetchAndSetMood = async () => {
                 const mood = await fetchMood(playbackState.songName, playbackState.artistName);
                 if (mood) {
-                    setMood(mood.moods);
+                    setMood(mood.significant_moods);
                     setColor(mood.color);
                 }
             };
@@ -156,6 +166,8 @@ const CallbackPage: React.FC = () => {
                     <h4>{playbackState.albumName}</h4>
                 </div>
             )}
+
+            <Starfield />
 
         </div>
     )
