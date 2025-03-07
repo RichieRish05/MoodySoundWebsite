@@ -91,6 +91,7 @@ const CallbackPage: React.FC = () => {
         let lastPlaybackState = playbackState; // Keep track of the last state
 
         const updatePlaybackState = async () => {
+            console.log("Updating playback state");
             try {
                 const currentPlaybackState = await fetchPlaybackState(spotifyApi);
 
@@ -162,6 +163,7 @@ const CallbackPage: React.FC = () => {
                 <h1>Welcome</h1>
                 {playbackState && (
                     <div>
+                        {mood && <h1>Mood: {mood.join(', ')}</h1>}
                         <img src={playbackState.imageUrl} alt="album cover" />
                         <h2>{playbackState.songName}</h2>
                         <h3>{playbackState.artistName}</h3>
