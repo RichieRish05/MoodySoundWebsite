@@ -3,12 +3,14 @@ import torch
 from collections import namedtuple
 from webcolors import rgb_to_hex
 
+# old mood_acoustic: (255, 136,   0)
+
 # Define mood colors (RGB format)
 MOOD_COLORS = {
     "danceable":       (147,  51, 255),  # Bright Purple
-    "mood_acoustic":   (255, 136,   0),  # Bright Orange
+    "mood_acoustic":   ( 41, 128, 185),  # Bright Orange
     "mood_aggressive": (255,   0,   0),  # Pure Red
-    "mood_electronic": (  0, 255, 217),  # Turquoise
+    "mood_electronic": (255, 136,   0),  # Turquoise
     "mood_happy":      (255, 221,   0),  # Golden Yellow
     "mood_party":      (255,   0, 255),  # Hot Pink
     "mood_relaxed":    ( 76, 217,  76),  # Lime Green
@@ -34,10 +36,13 @@ MOOD_POSITIONS = [
 
 def get_significant_moods(mood_vector: torch.Tensor):
     MAX_VALUE = torch.max(mood_vector)
+    THRESHOLD = MAX_VALUE * 0.8
 
     # Convert mood vector to dictionary
-    significant_moods = {label: float(value) for label, value in zip(MOOD_POSITIONS, mood_vector) if value > MAX_VALUE * 0.65}
+    significant_moods = {label: float(value) for label, value in zip(MOOD_POSITIONS, mood_vector) if value > THRESHOLD}
     sorted_moods = sorted(significant_moods.items(), key=lambda x: x[1], reverse=True)
+
+
 
 
     # If both happy and sad are in the significant moods, remove the one with the lower value
@@ -71,7 +76,7 @@ def get_moods_and_colors_from_mood_vector(mood_vector: torch.Tensor) -> dict:
 def blend_colors(moods):
     """Blend significant moods while preserving color vibrancy."""
     if len(moods) == 1:
-        return MOOD_COLORS[list(moods.keys())]
+        return MOOD_COLORS[list(moods.keys())[0]]
     
     weights = [0.7, 0.3, 0.2, 0.1, 0.1, 0.1, 0.1, 0.1]
 
