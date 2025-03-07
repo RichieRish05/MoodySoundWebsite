@@ -1,41 +1,9 @@
-.callback-page-wrapper {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-}
-
-/* Ensures entire page uses flexbox for layout */
-.callback-container {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    height: 100vh;
-    padding: 20px;
-}
-
-/* Left section - Album Cover & Text */
-.album-section {
-    width: 30%;
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-
-.album-section img {
-    width: 100%;
-    border-radius: 10px;
-}
-
-/* Right section - Ranking Board */
 .ranking-container {
     text-align: center;
     margin-top: 20px;
 }
 
+/* Rank Boxes */
 .rank-section {
     display: flex;
     justify-content: center;
@@ -43,8 +11,8 @@
 }
 
 .rank-box {
-    width: 120px;
-    height: 120px;
+    width: 200px;
+    height: 200px;
     background: rgba(255, 255, 255, 0.2);
     border-radius: 10px;
     display: flex;
@@ -54,25 +22,41 @@
     font-weight: bold;
     cursor: pointer;
     border: 2px dashed #ccc;
+    transition: background-color 0.3s ease-in-out;
 }
 
+/* Highlights drop zones when hovering over */
 .rank-box:hover {
     background-color: rgba(255, 255, 255, 0.3);
 }
 
+/* Ranked Items */
+.ranked-item {
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+}
+
+.ranked-item:hover {
+    color: red;
+}
+
+/* Draggable Items - Arranged in Two Rows */
 .draggable-items {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    /* 4 items per row */
     gap: 15px;
     margin-top: 20px;
+    justify-content: center;
+    margin-left: 25px;
 }
 
 .draggable-item {
     width: 120px;
-    /* Adjust width for better spacing */
+    /* Ensures consistency */
     height: 50px;
-    /* Adjust height for button-like appearance */
     background: rgba(255, 255, 255, 0.3);
     border-radius: 8px;
     display: flex;
@@ -81,9 +65,18 @@
     font-size: 16px;
     font-weight: bold;
     cursor: grab;
-    border: 2px solid black;
-    /* Persistent black border */
+    border: 2px solid black !important;
+    /* Forces border to always be applied */
     transition: background-color 0.3s ease-in-out;
+}
+
+/* Debugging: Add a red outline to check if CSS is being applied */
+.draggable-item::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 1px solid red;
+    pointer-events: none;
 }
 
 /* Optional: Slight background change on hover */
