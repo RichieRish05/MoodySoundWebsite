@@ -3,8 +3,11 @@ import SpotifyWebApi from 'spotify-web-api-js';
 import axios from 'axios';
 import './CallbackPage.css';
 import Starfield from '../../components/starfield';
+import RankingBoard from './RankingBoard';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL 
+<RankingBoard />
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
 interface PlaybackState {
     songName: string;
@@ -22,12 +25,12 @@ const getTokenFromUrl = (): TokenResponse => {
     return window.location.hash
         .substring(1)
         .split('&')
-        .reduce((initial, item) => {
+        .reduce((initial: Record<string, string>, item) => {
             let parts = item.split('=');
             initial[parts[0]] = decodeURIComponent(parts[1]);
             return initial;
-        }, {});
-}
+        }, {} as Record<string, string>);
+};
 
 const parsePlaybackState = (playbackState: any): PlaybackState | null => {
 
@@ -41,8 +44,8 @@ const parsePlaybackState = (playbackState: any): PlaybackState | null => {
     }
 
     return null;
-    
-    
+
+
 }
 
 const fetchPlaybackState = async (spotifyApi: SpotifyWebApi.SpotifyWebApiJs): Promise<PlaybackState | null> => {
@@ -73,7 +76,7 @@ const CallbackPage: React.FC = () => {
     const [playbackState, setPlaybackState] = useState<PlaybackState | null>(null);
     const [mood, setMood] = useState<number[] | null>(null);
     const [color, setColor] = useState<string | null>("#FFFFFF");
-    
+
     useEffect(() => {
         const tokens = getTokenFromUrl();
         if (tokens.access_token) {
@@ -84,13 +87,13 @@ const CallbackPage: React.FC = () => {
 
     useEffect(() => {
         if (!spotifyToken) return;
-    
+
         let lastPlaybackState = playbackState; // Keep track of the last state
-    
+
         const updatePlaybackState = async () => {
             try {
                 const currentPlaybackState = await fetchPlaybackState(spotifyApi);
-                
+
                 if (!arePlaybackStatesEqual(lastPlaybackState, currentPlaybackState)) {
                     setPlaybackState(currentPlaybackState);
                     lastPlaybackState = currentPlaybackState; // Update lastPlaybackState only if it changes
@@ -99,14 +102,14 @@ const CallbackPage: React.FC = () => {
                 console.error("Error fetching playback state:", error);
             }
         };
-    
+
         updatePlaybackState(); // Fetch immediately on mount
-    
+
         const intervalId = setInterval(updatePlaybackState, 3000); // Update the playback state every 3 seconds
-    
+
         return () => clearInterval(intervalId);
     }, [spotifyToken]); // Only re-run when spotifyToken changes
-    
+
 
     useEffect(() => {
         const fetchMood = async (songName, artistName) => {
@@ -153,24 +156,29 @@ const CallbackPage: React.FC = () => {
 
 
     return (
-        <div className="vh-100 d-flex flex-column align-items-center justify-content-center">
-            <h1>Welcome</h1>
+        <div className="callback-container">
+            {/* Left: Album Section */}
+            <div className="album-section">
+                <h1>Welcome</h1>
+                {playbackState && (
+                    <div>
+                        <img src={playbackState.imageUrl} alt="album cover" />
+                        <h2>{playbackState.songName}</h2>
+                        <h3>{playbackState.artistName}</h3>
+                        <h4>{playbackState.albumName}</h4>
+                    </div>
+                )}
+            </div>
 
-            {mood && <h2>Mood: {mood.join(', ')}</h2>}
-
-            {playbackState && (
-                <div>
-                    <img src={playbackState.imageUrl} alt="album cover" />
-                    <h2>{playbackState.songName}</h2>
-                    <h3>{playbackState.artistName}</h3>
-                    <h4>{playbackState.albumName}</h4>
-                </div>
-            )}
+            {/* Right: Ranking Section */}
+            <div className="ranking-section">
+                <RankingBoard />
+            </div>
 
             <Starfield />
-
         </div>
-    )
+    );
+
 }
 
 export default CallbackPage;
