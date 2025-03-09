@@ -1,0 +1,25 @@
+
+/* Draggable Items - Arranged in Two Rows */
+.draggable-mood {
+    width: 120px;
+    /* Ensures consistency */
+    height: 50px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+    border: 2px solid black !important;
+    /* Forces border to always be applied */
+    transition: background-color 0.3s ease-in-out;
+    cursor: move;  /* Shows a move cursor on hover */
+    user-select: none;  /* Prevents text selection while dragging */
+    touch-action: none;  /* Improves touch interaction */
+}
+
+
+.hidden {
+    visibility: hidden;
+}

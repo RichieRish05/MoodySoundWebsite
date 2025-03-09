@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 import SpotifyWebApi from 'spotify-web-api-js';
 import axios from 'axios';
 import './CallbackPage.css';
-import Starfield from '../../components/starfield';
-import RankingBoard from './RankingBoard';
+import DraggableMood from '../../components/DraggableMood/draggableMood';
+import MoodDropBox from '../../components/MoodDropBox/MoodDropBox';
+import RankingBoard from '../../components/RankingBoard/RankingBoard';
 
-<RankingBoard />
+
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
 
@@ -76,6 +77,7 @@ const CallbackPage: React.FC = () => {
     const [playbackState, setPlaybackState] = useState<PlaybackState | null>(null);
     const [mood, setMood] = useState<number[] | null>(null);
     const [color, setColor] = useState<string | null>("#FFFFFF");
+    const [retrievalError, setRetrievalError] = useState< true | false>(false);
 
     useEffect(() => {
         const tokens = getTokenFromUrl();
@@ -132,8 +134,13 @@ const CallbackPage: React.FC = () => {
             const fetchAndSetMood = async () => {
                 const mood = await fetchMood(playbackState.songName, playbackState.artistName);
                 if (mood) {
+                    setRetrievalError(false);
                     setMood(mood.significant_moods);
                     setColor(mood.color);
+                } else{
+                    setRetrievalError(true);
+                    setMood(null);
+                    setColor("#FFFFFF")
                 }
             };
             fetchAndSetMood();
@@ -154,6 +161,11 @@ const CallbackPage: React.FC = () => {
 
 
 
+    const moods = [
+        "Happy", "Party", "Relaxed", "Sad",
+        "Aggressive", "Electronic", "Danceable", "Acoustic"
+    ];
+
 
 
     return (
@@ -164,6 +176,7 @@ const CallbackPage: React.FC = () => {
                 {playbackState && (
                     <div>
                         {mood && <h1>Mood: {mood.join(', ')}</h1>}
+                        {retrievalError && <h1>Could Not Fetch Song Preview</h1>}
                         <img src={playbackState.imageUrl} alt="album cover" />
                         <h2>{playbackState.songName}</h2>
                         <h3>{playbackState.artistName}</h3>
@@ -173,11 +186,9 @@ const CallbackPage: React.FC = () => {
             </div>
 
             {/* Right: Ranking Section */}
-            <div className="ranking-section">
-                <RankingBoard />
-            </div>
+            <RankingBoard moods={moods} numPlaces={3}/>
 
-            <Starfield />
+            {/*<Starfield />*/}
         </div>
     );
 

@@ -56,17 +56,44 @@ def get_random_low_value(num_moods_changed: int):
     This is used to make insignificant moods have a lower value in the mood vector.
     """
     if num_moods_changed == 1:
-        # If only one mood is changed, get a random value between 0.2 and 0.3
-        return random.uniform(0.2, 0.3)
-    elif num_moods_changed == 2:
-        # If two moods are changed, get a random value between 0.1 and 0.2
         return random.uniform(0.1, 0.2)
+    elif num_moods_changed == 2:
+        return random.uniform(0.1, 0.15)
     elif num_moods_changed == 3:
-        # If three moods are changed, get a random value between 0.0 and 0.1
-        return random.uniform(0.0, 0.1)
+        return random.uniform(0.05, 0.1)
+
+
+def format_mood_representation(mood_representation: dict[str, int]):
+    """
+    Format the labels of the mood representation to match the labels of the data
+    """
+
+
+    mood_labels = {
+        "Danceable": "danceable",
+        "Acoustic": "mood_acoustic",
+        "Aggressive": "mood_aggressive",
+        "Electronic": "mood_electronic",
+        "Happy": "mood_happy",
+        "Party": "mood_party",
+        "Relaxed": "mood_relaxed",
+        "Sad": "mood_sad"
+    }
+
+
+    # Change the mood labels to reflect the labels used with the data
+    return {place: mood_labels[mood] for place, mood in mood_representation.items() if mood is not None}
+
+
 
 
 def generate_new_mood_vector(mood_representation: dict[str, int], predicted_mood: torch.Tensor):
+    """
+    Generate a new mood vector that more accurately represents a spectrogram
+    based on user input mood representation and the old, predicted mood vector
+    """
+
+    # The positions of the moods in the mood vector
     MOOD_POSITIONS = [
         "danceable",
         "mood_acoustic",
@@ -78,39 +105,44 @@ def generate_new_mood_vector(mood_representation: dict[str, int], predicted_mood
         "mood_sad"
     ]
 
+    # Format the mood_representation
+    mood_representation = format_mood_representation(mood_representation)
+
+
     # Get the number of moods changed 
-    num_moods_changed = sum(1 for value in mood_representation.values() if value != 0)
-
+    num_moods_changed = sum(1 for value in mood_representation.values() if value != None)
+    # Generate a new mood vector with random, low values depending on num_moods_changed
+    new_mood_vector = {mood: get_random_low_value(num_moods_changed) for mood in MOOD_POSITIONS}
     # Get the maximum value in the predicted mood vector
-    MAXIMUM = torch.max(predicted_mood)
+    MAXIMUM = float(torch.max(predicted_mood))
 
 
-    # Label the predicted mood vector
-    labeled_moods = {label: float(value) for label, value in zip(MOOD_POSITIONS, predicted_mood)}
 
-    # Manipulate the mood vector to be more accurate
-    for mood, value in mood_representation.items():
+
+    # Manipulate the new mood vector to be more accurate
+    for place, mood in mood_representation.items():
+        if not mood:
+            continue
+
         # Increase the corresponding mood value if it's dominant (value = 1, 2, 3)
-        if value == 1:
-            labeled_moods[mood] = max(0.6, MAXIMUM * 1.3)
-        elif value == 2:
-            labeled_moods[mood] = max(0.5, MAXIMUM * 1.2)
-        elif value == 3:
-            labeled_moods[mood] = max(0.4, MAXIMUM * 1.1)
+        if place == '1':
+            new_mood_vector[mood] = max(0.8, MAXIMUM * 1.5)
+        elif place == '2':
+            new_mood_vector[mood] = max(0.7, MAXIMUM * 1.3)
+        elif place == '3':
+            new_mood_vector[mood] = max(0.6, MAXIMUM * 1.2)
 
 
-        # If the mood is not dominant, get a random low value proportional to the number of moods changed
-        elif value == 0:
-            labeled_moods[mood] = get_random_low_value(num_moods_changed)
     
-    # Convert the labeled mood vector to a tensor
-    labeled_mood_vector = np.array(list(labeled_moods.values()))
+
+    # Convert the labeled mood vector into a numpy vector
+    new_mood_vector = np.array(list(new_mood_vector.values()))
 
 
-    # Normalize the labeled mood vector
-    norm = np.linalg.norm(labeled_mood_vector)
-    normalized_mood_vector = labeled_mood_vector / norm
 
+    # Normalize the mood vector
+    norm = np.linalg.norm(new_mood_vector)
+    normalized_mood_vector = new_mood_vector / norm
 
 
 
@@ -123,16 +155,8 @@ __all__ = [get_spectrogram_data.__name__, generate_spectrogram.__name__, generat
 
 if __name__ == "__main__":
     # Test the generate_new_mood_vector function
-    mood_representation = {
-        "danceable": 0,
-        "mood_acoustic": 0,
-        "mood_aggressive": 0,
-        "mood_electronic": 0,
-        "mood_happy": 0,
-        "mood_party": 0,
-        "mood_relaxed": 0,
-        "mood_sad": 1
-    }
+    mood_representation = {'1': 'Electronic', '2': 'Happy', '3': 'Sad'}
+    
 
     mood_vector = torch.tensor([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
 
