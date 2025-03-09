@@ -7,9 +7,11 @@ import axios from "axios";
 interface RankingBoardProps {
     moods: string[];
     numPlaces: number;
+    hideRankingBoard: (arg: boolean) => void;
+    toggleButtons: (arg: boolean) => void;
 }
 
-const RankingBoard: React.FC<RankingBoardProps> = ({ moods, numPlaces, hideRanking}) => {
+const RankingBoard: React.FC<RankingBoardProps> = ({ moods, numPlaces, hideRankingBoard, toggleButtons}) => {
     const [availableMoods, setAvailableMoods] = useState(moods)
     const [droppedMoods, setDroppedMoods] = useState<Record<number, string | null>>(() => {
         const initialMoods: Record<number, string | null> = {};
@@ -38,7 +40,6 @@ const RankingBoard: React.FC<RankingBoardProps> = ({ moods, numPlaces, hideRanki
 
     const handleClick = (event: React.MouseEvent) => {
         event.preventDefault()
-        hideRanking()
         console.log('ACCESSED')
         console.log(droppedMoods)
         setDroppedMoods(() => {
@@ -52,17 +53,21 @@ const RankingBoard: React.FC<RankingBoardProps> = ({ moods, numPlaces, hideRanki
         setAvailableMoods(moods);
         setResetKey(prev => prev + 1)
 
+        console.log('hiding board')
+        hideRankingBoard(false)
+        toggleButtons(false)
+
         const config = {
             moods: droppedMoods
         };
-        
 
         axios.post(import.meta.env.VITE_BACKEND_URL + '/correctmood', config)
-            .then(response => console.log(response.data))
+            .then(response => {
+                console.log(response.data);
+            })
             .catch(error => {
                 console.error('Error details:', error.response || error);
             });
-
     }
 
     useEffect(() => {
@@ -70,7 +75,7 @@ const RankingBoard: React.FC<RankingBoardProps> = ({ moods, numPlaces, hideRanki
     }, [droppedMoods])
 
     return (
-        <div className="justify-content-center d-flex flex-column align-items-center">
+        <div className={`justify-content-center d-flex flex-column align-items-center`}>
             <div className='ranking-board'>
                 {Array.from({length: numPlaces}, (_, i) => i + 1).map((val) => (
                     <MoodDropBox 

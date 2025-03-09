@@ -78,6 +78,7 @@ const CallbackPage: React.FC = () => {
     const [color, setColor] = useState<string | null>("#FFFFFF");
     const [retrievalError, setRetrievalError] = useState<boolean>(false);
     const [displayRankingBoard, setDisplayRankingBoard] = useState<boolean>(false);
+    const [showRecButtons, setShowRecButtons] = useState<boolean>(true);
 
 
     useEffect(() => {
@@ -187,10 +188,24 @@ const CallbackPage: React.FC = () => {
                 {/* Right: Ranking Section */}
 
                 <div className="right-panel mt-2">
-                    {playbackState && displayRankingBoard && <RankingBoard moods={moods} numPlaces={3}
-                    hideRanking={() => setDisplayRankingBoard(false)}/>}
-                    {playbackState && !displayRankingBoard && <RecommendationsCard makeRankingVisible={
-                        () => setDisplayRankingBoard(true)}/>}
+                    {playbackState && (
+                        <>
+                            {displayRankingBoard ? (
+                                <RankingBoard 
+                                    hideRankingBoard={setDisplayRankingBoard} 
+                                    moods={moods} 
+                                    numPlaces={3}
+                                    toggleButtons={setShowRecButtons}
+
+                                />
+                            ) : (
+                                <RecommendationsCard 
+                                    hideRankingBoard={setDisplayRankingBoard}
+                                    showButtons={showRecButtons} 
+                                />
+                            )}
+                        </>
+                    )}
                 </div>
 
                 

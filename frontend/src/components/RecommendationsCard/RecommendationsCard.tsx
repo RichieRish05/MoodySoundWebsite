@@ -1,37 +1,40 @@
 import React, { useState } from 'react';
 import './RecommendationsCard.css'
 interface RecommendationsCardProps {
-  makeRankingVisible: () => void;
+  hideRankingBoard: (arg: boolean) => void;
+  showButtons: boolean
 }
 
-const RecommendationsCard: React.FC<RecommendationsCardProps> = ({makeRankingVisible}) => {
+const RecommendationsCard: React.FC<RecommendationsCardProps> = ({hideRankingBoard, showButtons}) => {
 
-  const [buttonsVisible, setButtonsVisible] = useState(true)
+  const [buttonsVisible, setButtonsVisible] = useState(showButtons)
 
 
-  const onYes = (event) => {
+  const onYes = (event: React.MouseEvent) => {
     setButtonsVisible(false)
     
   }
 
-  const onNo = (event) => {
+  const onNo = (event: React.MouseEvent) => {
     setButtonsVisible(false)
-    makeRankingVisible()
+    hideRankingBoard(true)
     console.log('ACCESSED')
     
   }
 
 
   return (
-    <div className="card sticky-left">
+    <div className={`card sticky-left`}>
       {/* Title of card */}
       <h5 className="card-title" style={{color: 'black'}}>Songs with Similar Moods</h5>
       {/* Container for card body */}
+
+      {buttonsVisible && (
       <div className="card-body d-flex flex-column">
         <h5>Did We Get The Mood Right?</h5>
-        <button onClick={onYes} className={`${!buttonsVisible ? 'hidden' : ''}`}>Yes</button>
-        <button onClick={onNo} className={`${!buttonsVisible ? 'hidden' : ''}`}>No</button>
-      </div>
+        <button onClick={onYes} className={`${!buttonsVisible ? 'hidden' : '' }`}>Yes</button>
+        <button onClick={onNo} className={`${!buttonsVisible ? 'hidden' : '' }`}>No</button>
+      </div>)}
     </div>
   );
 };
