@@ -9,7 +9,7 @@ interface RankingBoardProps {
     numPlaces: number;
 }
 
-const RankingBoard: React.FC<RankingBoardProps> = ({ moods, numPlaces }) => {
+const RankingBoard: React.FC<RankingBoardProps> = ({ moods, numPlaces, hideRanking}) => {
     const [availableMoods, setAvailableMoods] = useState(moods)
     const [droppedMoods, setDroppedMoods] = useState<Record<number, string | null>>(() => {
         const initialMoods: Record<number, string | null> = {};
@@ -38,6 +38,8 @@ const RankingBoard: React.FC<RankingBoardProps> = ({ moods, numPlaces }) => {
 
     const handleClick = (event: React.MouseEvent) => {
         event.preventDefault()
+        hideRanking()
+        console.log('ACCESSED')
         console.log(droppedMoods)
         setDroppedMoods(() => {
             const initialMoods: Record<number, string | null> = {};
@@ -68,7 +70,7 @@ const RankingBoard: React.FC<RankingBoardProps> = ({ moods, numPlaces }) => {
     }, [droppedMoods])
 
     return (
-        <div>
+        <div className="justify-content-center d-flex flex-column align-items-center">
             <div className='ranking-board'>
                 {Array.from({length: numPlaces}, (_, i) => i + 1).map((val) => (
                     <MoodDropBox 
@@ -80,7 +82,7 @@ const RankingBoard: React.FC<RankingBoardProps> = ({ moods, numPlaces }) => {
                 ))}
             </div>
             
-            <div className='d-flex mood-container' style={{ marginLeft: '200px', width: '600px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <div className='d-flex mood-container' style={{ width: '85%', flexWrap: 'wrap', justifyContent: 'center' }}>
                 {moods.map((mood) => (
                     <div key={mood} className={availableMoods.includes(mood) ? '' : 'hidden'}>
                         {mood && <DraggableMood moodLabel={mood}/>}
@@ -88,10 +90,9 @@ const RankingBoard: React.FC<RankingBoardProps> = ({ moods, numPlaces }) => {
                 ))}
             </div>
             
-            <div className="h-100 d-flex align-items-center justify-content-center pt-4" style={{ marginLeft: '200px' }}>
+            <div className="d-flex justify-content-center pt-4">
                 <button className="button" role="button" onClick={handleClick}>Submit</button>
             </div>
-
         </div>
     );
 };

@@ -1,7 +1,7 @@
 
 /* Draggable Items - Arranged in Two Rows */
 .draggable-mood {
-    width: 120px;
+    width: 100px;
     /* Ensures consistency */
     height: 50px;
     background: rgba(255, 255, 255, 0.3);

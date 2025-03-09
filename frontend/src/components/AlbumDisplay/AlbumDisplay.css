@@ -1,0 +1,19 @@
+/* Left section - Album Cover & Text */
+
+.album-section {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.album-cover {
+    width: 60%;  /* Fixed width instead of percentage */
+    height: auto; /* Fixed height to maintain square aspect ratio */
+    border-radius: 10px;
+    object-fit: cover; /* Ensures the image covers the fixed space properly */
+}
+  
+.ranking-section {
+    flex: 1;
+}
+

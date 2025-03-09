@@ -1,7 +1,4 @@
 .button {
-    width: 120px;
-    /* Ensures consistency */
-    height: 50px;
     background: rgba(255, 255, 255, 0.3);
     border-radius: 8px;
     display: flex;
@@ -23,10 +20,8 @@
 
 .ranking-board{
     display: grid;
-    margin-left: 200px;
     justify-content: center; /* Move items to the center horizontally */
     align-items: center; /* Move items to the center vertically */
-    width: 600px;
      /* Define a fixed grid: here we assume 4 columns of equal width */
     grid-template-columns: repeat(4, 1fr);
     gap: 10px;

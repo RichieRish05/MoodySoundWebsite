@@ -1,0 +1,24 @@
+.card {
+    /* Increase size by scaling it up 20% */
+    width: 700px; /* Adjust width as needed */
+    height: 390px;
+    padding: 20px; /* Increase padding for more space */
+    
+    /* Make the card semi-transparent */
+    opacity: 0.4;
+    
+    /* Shift the card to the right by auto margin on the left */
+    margin-left: auto;
+    
+    /* Optional: additional styling */
+    max-width: 90%;  /* Prevents the card from stretching too far */
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+  }
+
+.hidden {
+    display: none;
+}
+  

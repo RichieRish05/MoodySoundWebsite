@@ -2,10 +2,9 @@ import { useEffect, useState } from 'react';
 import SpotifyWebApi from 'spotify-web-api-js';
 import axios from 'axios';
 import './CallbackPage.css';
-import DraggableMood from '../../components/DraggableMood/draggableMood';
-import MoodDropBox from '../../components/MoodDropBox/MoodDropBox';
 import RankingBoard from '../../components/RankingBoard/RankingBoard';
-
+import RecommendationsCard from '../../components/RecommendationsCard/RecommendationsCard';
+import AlbumDisplay from '../../components/AlbumDisplay/AlbumDisplay';
 
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
@@ -77,7 +76,9 @@ const CallbackPage: React.FC = () => {
     const [playbackState, setPlaybackState] = useState<PlaybackState | null>(null);
     const [mood, setMood] = useState<number[] | null>(null);
     const [color, setColor] = useState<string | null>("#FFFFFF");
-    const [retrievalError, setRetrievalError] = useState< true | false>(false);
+    const [retrievalError, setRetrievalError] = useState<boolean>(false);
+    const [displayRankingBoard, setDisplayRankingBoard] = useState<boolean>(false);
+
 
     useEffect(() => {
         const tokens = getTokenFromUrl();
@@ -115,7 +116,7 @@ const CallbackPage: React.FC = () => {
 
 
     useEffect(() => {
-        const fetchMood = async (songName, artistName) => {
+        const fetchMood = async (songName: string, artistName: string) => {
             const mood = await axios.get(`${BACKEND_URL}/mood?song=${songName}&artist=${artistName}`)
                 .then((res) => {
                     console.log(res.data);
@@ -169,27 +170,35 @@ const CallbackPage: React.FC = () => {
 
 
     return (
-        <div className="callback-container">
-            {/* Left: Album Section */}
-            <div className="album-section">
-                <h1>Welcome</h1>
-                {playbackState && (
-                    <div>
-                        {mood && <h1>Mood: {mood.join(', ')}</h1>}
-                        {retrievalError && <h1>Could Not Fetch Song Preview</h1>}
-                        <img src={playbackState.imageUrl} alt="album cover" />
-                        <h2>{playbackState.songName}</h2>
-                        <h3>{playbackState.artistName}</h3>
-                        <h4>{playbackState.albumName}</h4>
-                    </div>
-                )}
+        <div>
+            <h1 className='mb-5'>Welcome</h1>
+            <div className="page-content">
+
+                <div>
+                {playbackState && 
+                    <AlbumDisplay 
+                        playbackState={playbackState} 
+                        retrievalError={retrievalError} 
+                        mood={mood}
+                        />}
+
+                </div>
+
+                {/* Right: Ranking Section */}
+
+                <div className="right-panel mt-2">
+                    {playbackState && displayRankingBoard && <RankingBoard moods={moods} numPlaces={3}
+                    hideRanking={() => setDisplayRankingBoard(false)}/>}
+                    {playbackState && !displayRankingBoard && <RecommendationsCard makeRankingVisible={
+                        () => setDisplayRankingBoard(true)}/>}
+                </div>
+
+                
+
             </div>
 
-            {/* Right: Ranking Section */}
-            <RankingBoard moods={moods} numPlaces={3}/>
-
-            {/*<Starfield />*/}
         </div>
+        
     );
 
 }
