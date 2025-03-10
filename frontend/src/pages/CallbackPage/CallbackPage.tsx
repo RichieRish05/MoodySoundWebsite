@@ -146,6 +146,9 @@ const CallbackPage: React.FC = () => {
                 }
             };
             fetchAndSetMood();
+            console.log(showRecButtons)
+            console.log('ACCESSED')
+            setShowRecButtons(true);
         }
     }, [playbackState])
 

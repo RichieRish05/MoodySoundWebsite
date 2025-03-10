@@ -1,53 +1,13 @@
-import requests
-import librosa
-import numpy as np
-import tempfile
-import torch
 import random
+import torch
+import numpy as np
 
-
-def get_spectrogram_data(audio_url):
-    #Download the audio file
-    response = requests.get(audio_url)
-
-    # Save the file temporarily
-    with tempfile.NamedTemporaryFile(delete=True, suffix=".mp3") as temp_audio_file:
-        # Write the content of the audio file to the temporary file
-        temp_audio_file.write(response.content)
-
-        # Create a fake path for librosa to work with
-        temp_audio_path = temp_audio_file.name
-
-        # Load the temporary file with a predetermined sampling rate and a duration of 30 seconds to preprocess data
-        y, _ = librosa.load(temp_audio_path, sr=22050, duration=30)
-
-        # Normalize the audio waveform to a range of [-1, 1].
-        y_normalized = librosa.util.normalize(y)
-
-        # Obtain the spectrogram
-        spectrogram = generate_spectrogram(y_normalized)
-
-        return spectrogram
-    
-
-
-def generate_spectrogram(y, sr=22050, min_duration=10, max_duration=30, step=10):
-    # Target length in samples (30 seconds)
-    target_length = sr * max_duration  
-
-    # Format the audio to a standard shape (use y instead of audio)
-    y = np.pad(y, (0, max(0, target_length - len(y))), mode='constant')[:target_length]
-
-    # Generate a Mel spectrogram based on the sliced audio
-    S = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128, fmax=8000, dtype=np.float16)
-
-    # Convert power to decibels
-    S_db = librosa.power_to_db(S, ref=np.max)
-    
-    S_db = np.array(S_db)
-
-    return torch.FloatTensor(S_db).unsqueeze(0).unsqueeze(0)
-        
+def normalize_mood(mood_vector):
+    """
+    Normalize the mood vector so it has a magnitude of 1
+    """
+    norm = np.linalg.norm(mood_vector)
+    return mood_vector / norm
 
 def get_random_low_value(num_moods_changed: int):
     """
@@ -85,7 +45,6 @@ def format_mood_representation(mood_representation: dict[str, int]):
 
 
 
-
 def generate_new_mood_vector(mood_representation: dict[str, int], predicted_mood: torch.Tensor):
     """
     Generate a new mood vector that more accurately represents a spectrogram
@@ -116,8 +75,6 @@ def generate_new_mood_vector(mood_representation: dict[str, int], predicted_mood
     MAXIMUM = float(torch.max(predicted_mood))
 
 
-
-
     # Manipulate the new mood vector to be more accurate
     for place, mood in mood_representation.items():
         if not mood:
@@ -136,35 +93,50 @@ def generate_new_mood_vector(mood_representation: dict[str, int], predicted_mood
 
     # Convert the labeled mood vector into a numpy vector
     new_mood_vector = np.array(list(new_mood_vector.values()))
+    return normalize_mood(new_mood_vector)
+
+
+def modify_mood(mood_vector, transformation_type: str):
+    """
+    Modify the mood vector based on the specified transformation type.
+    """
+
+    # Make a copy to 
+    mood_vector = np.array(mood_vector).copy()
+    # Define mood positions for easy reference
+    MOOD_POSITIONS = {
+        'danceable': 0,
+        'acoustic': 1,
+        'aggressive': 2,
+        'electric': 3,
+        'happy': 4,
+        'party': 5,
+        'relaxed': 6,
+        'sad': 7
+    }
+
+    # Define which moods to amplify for each transformation
+    TRANSFORMATIONS = {
+        'normalize': [],
+        'pitch_up': ['happy', 'party'],
+        'pitch_down': ['sad', 'relaxed'],
+        'speed_up': ['danceable', 'party', 'happy'],
+        'slow_down': ['sad', 'relaxed']
+    }
+
+    # Apply the transformation
+    for mood in TRANSFORMATIONS[transformation_type]:
+        mood_vector[MOOD_POSITIONS[mood]] = max(0.25, mood_vector[MOOD_POSITIONS[mood]] * 1.25)
+
+
+    # Return normalized vector
+    return normalize_mood(mood_vector)
 
 
 
-    # Normalize the mood vector
-    norm = np.linalg.norm(new_mood_vector)
-    normalized_mood_vector = new_mood_vector / norm
+if __name__ == '__main__':
 
 
-
-    return normalized_mood_vector
-
-
-
-
-__all__ = [get_spectrogram_data.__name__, generate_new_mood_vector.__name__]
-
-
-if __name__ == "__main__":
-    # Test the generate_new_mood_vector function
-    mood_representation = {'1': 'Electronic', '2': 'Happy', '3': 'Sad'}
-    
-
-    mood_vector = torch.tensor([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
-
-
-    new_mood_vector = generate_new_mood_vector(mood_representation, mood_vector)
-
-    print(new_mood_vector)
-    
-
-
-
+    # Get the corrected mood vector
+    corrected_mood_vector = np.array([0.055473766272003046, 0.5142119172134582, 0.04317293196632012, 0.0629753780371928, 0.04420166251078848, 0.03548774361120182, 0.5570629103145797, 0.6427648965168227])
+    print(modify_mood(corrected_mood_vector, "pitch_up"))
