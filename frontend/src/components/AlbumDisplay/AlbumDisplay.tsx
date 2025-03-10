@@ -1,12 +1,13 @@
-import './AlbumDisplay.css'
+import './AlbumDisplay.css';
+import { motion } from 'framer-motion';
 
 interface AlbumDisplayProps {
-  playbackState: any;
-  mood: any;
-  retrievalError: any;
+    playbackState: any;
+    mood: any;
+    retrievalError: any;
 }
 
-const AlbumDisplay = ({playbackState, mood, retrievalError}) => {
+const AlbumDisplay = ({ playbackState, mood, retrievalError }: AlbumDisplayProps) => {
 
     const MoodNames = new Map([
         ['mood_acoustic', 'Acoustic'],
@@ -19,11 +20,14 @@ const AlbumDisplay = ({playbackState, mood, retrievalError}) => {
         ['mood_aggressive', 'Aggressive']
     ]);
 
-    
-
     return (
-        <div className="album-section">
-
+        <motion.div
+            className="album-section"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4 }}
+        >
             <div>
                 {mood && <h2>Mood: {mood.map(m => MoodNames.get(m)).join(', ')}</h2>}
                 {retrievalError && <h1>Could Not Fetch Song Preview</h1>}
@@ -32,10 +36,8 @@ const AlbumDisplay = ({playbackState, mood, retrievalError}) => {
                 <h3>{playbackState.artistName}</h3>
                 <h4>{playbackState.albumName}</h4>
             </div>
-
-        </div>
-    )
-
-}
+        </motion.div>
+    );
+};
 
 export default AlbumDisplay;

@@ -1,4 +1,3 @@
-import pandas as pd
 import torch
 from collections import namedtuple
 from webcolors import rgb_to_hex

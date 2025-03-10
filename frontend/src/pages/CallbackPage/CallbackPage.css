@@ -1,9 +1,30 @@
 .page-content {
-    display: flex;
-    justify-content: flex-start; /* Align children to the start (left) */
-    align-items: flex-start;
-    gap: 20px; /* Optional: Adds space between the two sections */
-  }
-  
+  display: flex;
+  justify-content: flex-start;
+  /* Align children to the start (left) */
+  align-items: flex-start;
+  gap: 20px;
+  /* Optional: Adds space between the two sections */
+}
 
-  
+.site-title {
+  position: absolute;
+  /* Remove it from normal flow */
+  top: 20px;
+  /* Push it down a little */
+  left: 50%;
+  /* Center horizontally */
+  transform: translateX(-50%);
+  /* True horizontal center */
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 200;
+  /* Semi-bold for Apple look */
+  font-size: 60px;
+  /* Adjust size as you like */
+  color: #000;
+  /* Or #333 for softer black */
+  letter-spacing: 1px;
+  /* Slight spacing for polish */
+  z-index: 10;
+  /* Keep above other elements */
+}

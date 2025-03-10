@@ -1,42 +1,51 @@
-import React, { useState } from 'react';
-import './RecommendationsCard.css'
+import React from 'react';
+import './RecommendationsCard.css';
+
+// Props expected by the RecommendationsCard component
 interface RecommendationsCardProps {
-  hideRankingBoard: (arg: boolean) => void;
-  showButtons: boolean
+  hideRankingBoard: (arg: boolean) => void;  // Function to toggle the ranking board visibility
+  showButtons: boolean;                      // Controls whether Yes/No buttons are shown
+  onYesClick: () => void;                    // Callback when user clicks "Yes"
 }
 
-const RecommendationsCard: React.FC<RecommendationsCardProps> = ({hideRankingBoard, showButtons}) => {
+const RecommendationsCard: React.FC<RecommendationsCardProps> = ({
+  hideRankingBoard,
+  showButtons,
+  onYesClick
+}) => {
 
-  const [buttonsVisible, setButtonsVisible] = useState(showButtons)
-
-
+  // Called when the user agrees with the mood detection
   const onYes = (event: React.MouseEvent) => {
-    setButtonsVisible(false)
-    
-  }
+    onYesClick();
+  };
 
+  // Called when the user disagrees and wants to rank moods manually
   const onNo = (event: React.MouseEvent) => {
-    setButtonsVisible(false)
-    hideRankingBoard(true)
-    console.log('ACCESSED')
-    
-  }
-
+    hideRankingBoard(true);
+    console.log('ACCESSED'); // Optional debug log
+  };
 
   return (
-    <div className={`card sticky-left`}>
-      {/* Title of card */}
-      <h5 className="card-title" style={{color: 'black'}}>Songs with Similar Moods</h5>
-      {/* Container for card body */}
+    <div className="card sticky-left">
+      {showButtons ? (
+        <>
+          <h5 className="card-title" style={{ color: 'black' }}>
+            Songs with Similar Moods
+          </h5>
 
-      {buttonsVisible && (
-      <div className="card-body d-flex flex-column">
-        <h5>Did We Get The Mood Right?</h5>
-        <button onClick={onYes} className={`${!buttonsVisible ? 'hidden' : '' }`}>Yes</button>
-        <button onClick={onNo} className={`${!buttonsVisible ? 'hidden' : '' }`}>No</button>
-      </div>)}
+          <div className="card-body d-flex flex-column">
+            <h5>Did We Get The Mood Right?</h5>
+            <button onClick={onYes}>Yes</button>
+            <button onClick={onNo}>No</button>
+          </div>
+        </>
+      ) : (
+        <h5 className="card-title" style={{ color: 'black' }}>
+          Songs with Similar Moods
+        </h5>
+      )}
     </div>
   );
 };
 
-export default RecommendationsCard; 
+export default RecommendationsCard;
