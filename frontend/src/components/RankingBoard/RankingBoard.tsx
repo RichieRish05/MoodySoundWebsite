@@ -9,9 +9,10 @@ interface RankingBoardProps {
     numPlaces: number;
     hideRankingBoard: (arg: boolean) => void;
     toggleButtons: (arg: boolean) => void;
+    songInfo: Object;
 }
 
-const RankingBoard: React.FC<RankingBoardProps> = ({ moods, numPlaces, hideRankingBoard, toggleButtons}) => {
+const RankingBoard: React.FC<RankingBoardProps> = ({ moods, numPlaces, hideRankingBoard, toggleButtons, songInfo}) => {
     const [availableMoods, setAvailableMoods] = useState(moods)
     const [droppedMoods, setDroppedMoods] = useState<Record<number, string | null>>(() => {
         const initialMoods: Record<number, string | null> = {};
@@ -58,7 +59,9 @@ const RankingBoard: React.FC<RankingBoardProps> = ({ moods, numPlaces, hideRanki
         toggleButtons(false)
 
         const config = {
-            moods: droppedMoods
+            moods: droppedMoods,
+            songInfo: songInfo.songName,
+            vector: songInfo.vector
         };
 
         axios.post(import.meta.env.VITE_BACKEND_URL + '/correctmood', config)

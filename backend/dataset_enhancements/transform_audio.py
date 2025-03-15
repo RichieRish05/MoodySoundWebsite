@@ -45,3 +45,11 @@ def time_stretch(y, rate=1):
     y_stretched = librosa.effects.time_stretch(y, rate=rate)
     return normalize_audio(y_stretched)
 
+
+
+__all__ = [
+    get_audio.__name__, 
+    normalize_audio.__name__, 
+    pitch_shift.__name__, 
+    time_stretch.__name__
+]

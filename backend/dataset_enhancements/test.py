@@ -1,13 +1,13 @@
 import numpy as np
-from transform_audio import get_audio, normalize_audio, pitch_shift, time_stretch
-from correct_mood import modify_mood
-from dataset_enhancements import generate_new_data
+from dataset_enhancements.transform_audio import get_audio, normalize_audio, pitch_shift, time_stretch
+from dataset_enhancements.correct_mood import modify_mood
+from dataset_enhancements.dataset_enhancements import generate_new_data
 import sounddevice as sd
+from services import get_song_preview
 
 # Get the audio url from the search query
 query = 'Higher, Tems'
-audio_url = "https://cdnt-preview.dzcdn.net/api/1/1/6/3/6/0/63676ab7820760a38a0a30c4cbfe43b1.mp3?hdnea=exp=1741591259~acl=/api/1/1/6/3/6/0/63676ab7820760a38a0a30c4cbfe43b1.mp3*~data=user_id=0,application_id=42~hmac=c96e908fee31c749bb764c5ad909c02d7f6c5fb0655eb24a3a54253ae4cdc36f"
-
+audio_url = get_song_preview(query)
 # Get the audio from the search query
 audio = get_audio(audio_url)
 

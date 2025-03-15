@@ -72,7 +72,7 @@ def generate_new_mood_vector(mood_representation: dict[str, int], predicted_mood
     # Generate a new mood vector with random, low values depending on num_moods_changed
     new_mood_vector = {mood: get_random_low_value(num_moods_changed) for mood in MOOD_POSITIONS}
     # Get the maximum value in the predicted mood vector
-    MAXIMUM = float(torch.max(predicted_mood))
+    MAXIMUM = max(predicted_mood)
 
 
     # Manipulate the new mood vector to be more accurate
@@ -133,6 +133,8 @@ def modify_mood(mood_vector, transformation_type: str):
     return normalize_mood(mood_vector)
 
 
+
+__all__ = [generate_new_mood_vector.__name__, modify_mood.__name__]
 
 if __name__ == '__main__':
 

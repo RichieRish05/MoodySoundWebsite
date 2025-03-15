@@ -74,6 +74,7 @@ const CallbackPage: React.FC = () => {
     const spotifyApi = new SpotifyWebApi();
     const [spotifyToken, setSpotifyToken] = useState<string | null>(null);
     const [playbackState, setPlaybackState] = useState<PlaybackState | null>(null);
+    const [songInfo, setSongInfo] = useState<string | null>(null);
     const [mood, setMood] = useState<number[] | null>(null);
     const [color, setColor] = useState<string | null>("#FFFFFF");
     const [retrievalError, setRetrievalError] = useState<boolean>(false);
@@ -89,6 +90,8 @@ const CallbackPage: React.FC = () => {
         }
     }, []);
 
+
+    // Effect to fetch the current playback state
     useEffect(() => {
         if (!spotifyToken) return;
 
@@ -116,16 +119,29 @@ const CallbackPage: React.FC = () => {
     }, [spotifyToken]); // Only re-run when spotifyToken changes
 
 
+    // Effect to fetch the mood of the current song and set the state
     useEffect(() => {
-        const fetchMood = async (songName: string, artistName: string) => {
+        const fetchAndSetMood = async (songName: string, artistName: string) => {
+            /*
+            This function fetches the mood of the current song from the backend
+            and sets the mood, color, and song info in the state
+            */
             const mood = await axios.get(`${BACKEND_URL}/mood?song=${songName}&artist=${artistName}`)
                 .then((res) => {
-                    console.log(res.data);
+                    console.log(res.data); // Log the response data
+                    setRetrievalError(false); // Set retrieval error to false
+                    setMood(res.data.significant_moods); // Set the mood
+                    setSongInfo({songName: res.data.search_query, vector: res.data.vector}); // Set the song info
+                    setColor(res.data.color); // Set the color
                     return res.data;
 
                 })
                 .catch((err) => {
-                    console.error(err);
+                    setRetrievalError(true); // Set retrieval error to true
+                    setMood(null); // Set the mood to null
+                    setColor("#FFFFFF") // Set the color to white
+                    console.error(err); // Log the error
+                    
                     return null;
                 });
 
@@ -133,26 +149,15 @@ const CallbackPage: React.FC = () => {
         }
 
         if (playbackState) {
-            const fetchAndSetMood = async () => {
-                const mood = await fetchMood(playbackState.songName, playbackState.artistName);
-                if (mood) {
-                    setRetrievalError(false);
-                    setMood(mood.significant_moods);
-                    setColor(mood.color);
-                } else{
-                    setRetrievalError(true);
-                    setMood(null);
-                    setColor("#FFFFFF")
-                }
-            };
-            fetchAndSetMood();
-            console.log(showRecButtons)
-            console.log('ACCESSED')
-            setShowRecButtons(true);
+            fetchAndSetMood(playbackState.songName, playbackState.artistName);
+            setShowRecButtons(true); // Set the show reccomendation buttons to true
         }
+
+        
     }, [playbackState])
 
 
+    // Effect to set the background color each time the color changes
     useEffect(() => {
         document.body.style.transition = 'background-color 0.5s ease';
 
@@ -166,6 +171,7 @@ const CallbackPage: React.FC = () => {
 
 
 
+    // Moods for the ranking board
     const moods = [
         "Happy", "Party", "Relaxed", "Sad",
         "Aggressive", "Electronic", "Danceable", "Acoustic"
@@ -185,6 +191,8 @@ const CallbackPage: React.FC = () => {
                         retrievalError={retrievalError} 
                         mood={mood}
                         />}
+                
+                {!playbackState ? <h1>Play A Song To Get Started</h1> : ''}
 
                 </div>
 
@@ -199,6 +207,7 @@ const CallbackPage: React.FC = () => {
                                     moods={moods} 
                                     numPlaces={3}
                                     toggleButtons={setShowRecButtons}
+                                    songInfo={songInfo}
 
                                 />
                             ) : (

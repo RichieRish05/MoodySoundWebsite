@@ -1,12 +1,28 @@
 import librosa
 import numpy as np
-from transform_audio import normalize_audio, pitch_shift, time_stretch
-from correct_mood import modify_mood
+from dataset_enhancements.transform_audio import get_audio, normalize_audio, pitch_shift, time_stretch
+from dataset_enhancements.correct_mood import modify_mood
+import boto3
 
+
+def sanitize_song_name(song_name):
+    """
+    Clean the song name to be used as a file name
+    """
+    # Replace spaces with underscores
+    song_name = song_name.strip().replace(' ', '_')
+
+    invalid_characters = ['/', '\\',':', '*', '?', '"', '<', '>', '|' ]
+
+    # Remove invalid characters
+    sanitized_song_name = ''.join(char for char in song_name if char not in invalid_characters)
+
+
+    return sanitized_song_name
 
 def get_spectrogram(y):
     """
-    Get a spectrogram with 30 seconds of audio and a sr of 22050
+    Get a spectrogram with 30 seconds of audio and a standard sampling rate of 22050
     """
     sr = 22050
     max_duration = 30
@@ -23,49 +39,70 @@ def get_spectrogram(y):
 
     return S_db
 
-def generate_new_data(y, corrected_mood_vector):
+def generate_new_data(song_name, y, corrected_mood_vector):
     """
     Apply transformations to the audio and generate corresponding spectrograms and mood vectors.
+    
+        
+    Yields:
+        dict: Dictionary containing transformed audio data with keys:
+            - name: String identifier for the transformation
+            - spectrogram: Mel spectrogram of transformed audio
+            - mood: Modified mood vector
     """
 
-    transformations = {
-        # Original audio, normalized
-        "normalized": (
-            get_spectrogram(normalize_audio(y)),
-            modify_mood(corrected_mood_vector, "normalize")
-        ),
-        
-        # Pitch transformations
-        "higher_pitch": (
-            get_spectrogram(pitch_shift(y, n_steps=1.5)),
-            modify_mood(corrected_mood_vector, "pitch_up")
-        ),
-        "lower_pitch": (
-            get_spectrogram(pitch_shift(y, n_steps=-1.5)),
-            modify_mood(corrected_mood_vector, "pitch_down")
-        ),
-        
-        # Speed transformations
-        "speed_up": (
-            get_spectrogram(time_stretch(y, rate=1.1)),
-            modify_mood(corrected_mood_vector, "speed_up")
-        ),
-        "slow_down": (
-            get_spectrogram(time_stretch(y, rate=0.9)),
-            modify_mood(corrected_mood_vector, "slow_down")
-        )
-    }
-    
-    return transformations
+    # Define transformations as a list of tuples
+    transformations = [
+        ("normalized", normalize_audio, {}, "normalize"),
+        ("pitch up", pitch_shift, {"n_steps": 1.5}, "pitch_up"),
+        ("pitch down", pitch_shift, {"n_steps": -1.5}, "pitch_down"),
+        ("speed up", time_stretch, {"rate": 1.1}, "speed_up"),
+        ("slow down", time_stretch, {"rate": 0.9}, "slow_down")
+    ]
+
+    # Yield each transformation one at a time
+    for suffix, transform_func, args, mood_type in transformations:
+        try:
+            transformed_audio = transform_func(y, **args)
+            yield {
+                "name": f"{sanitize_song_name(song_name)}_{suffix}",
+                "spectrogram": get_spectrogram(transformed_audio),
+                "mood": modify_mood(corrected_mood_vector, mood_type)
+            }
+        except Exception as e:
+            print(f"Failed to process {suffix} transformation: {str(e)}")
+            continue
+
+
+def upload_to_s3(file_name, bucket_name, object_name):
+    """
+    Upload a file to an S3 bucket
+    """
+    s3 = boto3.client('s3')
+    s3.upload_file(
+        Filename=file_name, 
+        Bucket=bucket_name, 
+        Key=object_name
+    )
 
 
 
 
-
-
+__all__ = [generate_new_data.__name__]
 
 if __name__ == '__main__':
-    mood = np.array([0.10579624262459593, 0.12441237013592801, 0.731041523983839, 0.09889122376391296, 0.08999753317332732, 0.6335693207859938, 0.095509896673731, 0.10244878084391208])
+    # Get the audio url
+    audio_url = "https://cdnt-preview.dzcdn.net/api/1/1/6/3/6/0/63676ab7820760a38a0a30c4cbfe43b1.mp3?hdnea=exp=1741767512~acl=/api/1/1/6/3/6/0/63676ab7820760a38a0a30c4cbfe43b1.mp3*~data=user_id=0,application_id=42~hmac=2b043d386a35f36e51a4b90611f9b95d701f74e2763c19ca9dc3838b9b908e03"
+   
+
+    y = get_audio(audio_url)
+    mood = [0.5 for x in range(8)]
+
+    for x in generate_new_data("Free Mind, Tems", y, mood):
+        print(f"Name: {x['name']}")
+        print(f"Spectrogram: {x['spectrogram'].shape}")
+        print(f"Mood: {x['mood']}")
 
 
-    print(mood)
+
+

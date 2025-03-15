@@ -1,9 +1,7 @@
-import pandas as pd
 import torch
-from collections import namedtuple
 from webcolors import rgb_to_hex
 
-# old mood_acoustic: (255, 136,   0)
+
 
 # Define mood colors (RGB format)
 MOOD_COLORS = {
@@ -34,12 +32,12 @@ MOOD_POSITIONS = [
 
 
 
-def get_significant_moods(mood_vector: torch.Tensor):
-    MAX_VALUE = torch.max(mood_vector)
+def get_significant_moods(mood_vector: list):
+    MAX_VALUE = max(mood_vector)
     THRESHOLD = MAX_VALUE * 0.8
 
     # Convert mood vector to dictionary
-    significant_moods = {label: float(value) for label, value in zip(MOOD_POSITIONS, mood_vector) if value > THRESHOLD}
+    significant_moods = {label: value for label, value in zip(MOOD_POSITIONS, mood_vector) if value > THRESHOLD}
     sorted_moods = sorted(significant_moods.items(), key=lambda x: x[1], reverse=True)
 
 
@@ -61,7 +59,7 @@ def get_significant_moods(mood_vector: torch.Tensor):
 
 
 
-def get_moods_and_colors_from_mood_vector(mood_vector: torch.Tensor) -> dict:
+def get_moods_and_colors_from_mood_vector(mood_vector: list) -> dict:
     significant_moods = get_significant_moods(mood_vector)
 
 
@@ -69,7 +67,7 @@ def get_moods_and_colors_from_mood_vector(mood_vector: torch.Tensor) -> dict:
     return {
         "significant_moods": list(significant_moods.keys()),
         "color": rgb_to_hex(blend_colors(significant_moods)),
-        "vector": mood_vector.tolist()
+        "vector": mood_vector
     }
 
 
