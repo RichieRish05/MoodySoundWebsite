@@ -3,6 +3,10 @@ from flask_cors import CORS
 import torch
 import services
 import dataset_enhancements
+import threading
+import boto3
+import tempfile
+import numpy as np
 
 app = Flask(__name__)
 CORS(app)
@@ -42,6 +46,69 @@ def predict_mood():
 
     return jsonify(song_info)
 
+def upload_mood_to_s3(s3_client, song_name, mood):
+    """
+    A function to upload a mood to the s3 bucket
+    """
+    try:
+        with tempfile.NamedTemporaryFile(suffix='.npy', delete=True) as f:
+            # Save the mood to the temporary file
+            np.save(f.name, mood)
+            f.flush()  # Ensure all data is written to disk
+
+            # Upload the file to S3
+            s3_client.upload_file(
+                Filename=f.name,
+                Bucket='rishitestbucket01',
+                Key=f'data/targets/{song_name}_target.npy'
+            )
+        return True
+    except Exception as e:
+        print(f"Error uploading spectrogram to S3: {str(e)}")
+        return False
+
+
+
+
+def upload_spec_to_s3(s3_client, song_name, spec):
+    """
+    A function to upload spectrograms to the s3 bucket
+    """
+    try:
+        with tempfile.NamedTemporaryFile(suffix='.npy', delete=True) as f:
+            # Save the spectrogram to the temporary file
+            np.save(f.name, spec)
+            f.flush()  # Ensure all data is written to disk
+
+            # Upload the file to S3
+            s3_client.upload_file(
+                Filename=f.name,
+                Bucket='rishitestbucket01',
+                Key=f'data/spectrograms/{song_name}_matrix.npy'
+            )
+        return True
+    except Exception as e:
+        print(f"Error uploading spectrogram to S3: {str(e)}")
+        return False
+    
+
+
+def process_transformations(transformations):
+    """
+    A function to asynchronously process the new spectrogram
+    data and upload to s3
+    """
+    s3 = boto3.client('s3')
+    try:
+        for x in transformations:
+            print(f"Name: {x['name']}")
+            print(f"Spectrogram: {x['spectrogram'].shape}")
+            print(f"Mood: {x['mood']}")
+            upload_spec_to_s3(s3_client=s3, song_name=x['name'], spec=x['spectrogram'])
+            upload_mood_to_s3(s3_client=s3, song_name=x['name'], mood=x['mood'])
+    except Exception as e:
+        print(str(e))
+
 @app.post('/correctmood')
 def correct_mood():
     """
@@ -70,24 +137,18 @@ def correct_mood():
 
 
 
-        # Generate the data here and see if everything is ok
+        # Create the new data generator
         transformations = dataset_enhancements.generate_new_data(song_info, audio, new_mood)
-
-        try: 
-            for x in transformations:
-                print(f"Name: {x['name']}")
-                print(f"Spectrogram: {x['spectrogram'].shape}")
-                print(f"Mood: {x['mood']}")
-        except Exception as e:
-            print(str(e))
-            
-
         
+        # Start processing transformations in a separate thread
+        thread = threading.Thread(target=process_transformations, args=(transformations,))
+        thread.start()
 
         return jsonify({'new_mood': new_mood}) 
     
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)

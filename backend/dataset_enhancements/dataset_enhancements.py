@@ -66,8 +66,8 @@ def generate_new_data(song_name, y, corrected_mood_vector):
             transformed_audio = transform_func(y, **args)
             yield {
                 "name": f"{sanitize_song_name(song_name)}_{suffix}",
-                "spectrogram": get_spectrogram(transformed_audio),
-                "mood": modify_mood(corrected_mood_vector, mood_type)
+                "spectrogram": np.array(get_spectrogram(transformed_audio)),
+                "mood": np.array(modify_mood(corrected_mood_vector, mood_type))
             }
         except Exception as e:
             print(f"Failed to process {suffix} transformation: {str(e)}")
