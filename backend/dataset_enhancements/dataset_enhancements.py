@@ -2,6 +2,7 @@ import librosa
 import numpy as np
 from dataset_enhancements.transform_audio import get_audio, normalize_audio, pitch_shift, time_stretch
 from dataset_enhancements.correct_mood import modify_mood
+from services import get_significant_moods
 import boto3
 
 
@@ -39,7 +40,9 @@ def get_spectrogram(y):
 
     return S_db
 
-def generate_new_data(song_name, y, corrected_mood_vector):
+
+
+def generate_new_data(artist, title, y, corrected_mood_vector):
     """
     Apply transformations to the audio and generate corresponding spectrograms and mood vectors.
     
@@ -64,10 +67,18 @@ def generate_new_data(song_name, y, corrected_mood_vector):
     for suffix, transform_func, args, mood_type in transformations:
         try:
             transformed_audio = transform_func(y, **args)
+            spectrogram = get_spectrogram(transformed_audio)
+            mood = modify_mood(corrected_mood_vector, mood_type)
+            comprehensive_mood = ', '.join(get_significant_moods(mood).keys())
+
             yield {
-                "name": f"{sanitize_song_name(song_name)}_{suffix}",
-                "spectrogram": np.array(get_spectrogram(transformed_audio)),
-                "mood": np.array(modify_mood(corrected_mood_vector, mood_type))
+                "spectrogram_file_name": f"{sanitize_song_name(f'{title}_{artist}')}_{mood_type}_matrix.npy",
+                "target_file_name": f"{sanitize_song_name(f'{title}_{artist}')}_{mood_type}_target.npy",
+                "spectrogram": np.array(spectrogram),
+                "mood": np.array(mood),
+                "artist": artist,
+                "title": f'{title}_{mood_type}',
+                "comprehensive_mood": comprehensive_mood
             }
         except Exception as e:
             print(f"Failed to process {suffix} transformation: {str(e)}")

@@ -42,11 +42,14 @@ def predict_mood():
 
     song_info = services.get_moods_and_colors_from_mood_vector(mood)
     song_info["search_query"] = search_query
+    song_info["title"] = song
+    song_info["artist"] = artist
 
 
     return jsonify(song_info)
 
-def upload_mood_to_s3(s3_client, song_name, mood):
+
+def upload_mood_to_s3(s3_client, file_name, mood):
     """
     A function to upload a mood to the s3 bucket
     """
@@ -60,7 +63,7 @@ def upload_mood_to_s3(s3_client, song_name, mood):
             s3_client.upload_file(
                 Filename=f.name,
                 Bucket='rishitestbucket01',
-                Key=f'data/targets/{song_name}_target.npy'
+                Key=f'data/targets/{file_name}'
             )
         return True
     except Exception as e:
@@ -70,7 +73,7 @@ def upload_mood_to_s3(s3_client, song_name, mood):
 
 
 
-def upload_spec_to_s3(s3_client, song_name, spec):
+def upload_spec_to_s3(s3_client, file_name, spec):
     """
     A function to upload spectrograms to the s3 bucket
     """
@@ -84,7 +87,7 @@ def upload_spec_to_s3(s3_client, song_name, spec):
             s3_client.upload_file(
                 Filename=f.name,
                 Bucket='rishitestbucket01',
-                Key=f'data/spectrograms/{song_name}_matrix.npy'
+                Key=f'data/spectrograms/{file_name}'
             )
         return True
     except Exception as e:
@@ -101,11 +104,18 @@ def process_transformations(transformations):
     s3 = boto3.client('s3')
     try:
         for x in transformations:
-            print(f"Name: {x['name']}")
-            print(f"Spectrogram: {x['spectrogram'].shape}")
-            print(f"Mood: {x['mood']}")
-            upload_spec_to_s3(s3_client=s3, song_name=x['name'], spec=x['spectrogram'])
-            upload_mood_to_s3(s3_client=s3, song_name=x['name'], mood=x['mood'])
+            # print(f"Spectrogram: {x['spectrogram']}")
+            # print(f"Mood: {x['mood']}")3
+            row = dataset_enhancements.create_row(
+                artist= x['artist'],
+                song_name= x['title'],
+                spec_path= x['spectrogram_file_name'],
+                target_path= x['target_file_name'],
+                comprehensive_mood=x['comprehensive_mood'])
+            
+            dataset_enhancements.write_to_table('TestMoodySoundTable', row)
+            # upload_spec_to_s3(s3_client=s3, file_name=x['spectrogram_file_name'], spec=x['spectrogram'])
+            # upload_mood_to_s3(s3_client=s3, file_name=x['target_file_name'], mood=x['mood'])
     except Exception as e:
         print(str(e))
 
@@ -121,6 +131,8 @@ def correct_mood():
         correct_moods = request.get_json()['moods']
         vector = request.get_json()['vector']
         song_info = request.get_json()['songInfo']
+        title = request.get_json()['title']
+        artist = request.get_json()['artist']
 
         # Get the audio url
         audio_url = services.get_song_preview(song_info)
@@ -136,11 +148,10 @@ def correct_mood():
         audio = dataset_enhancements.get_audio(audio_url) # Move this into services
 
 
-
         # Create the new data generator
-        transformations = dataset_enhancements.generate_new_data(song_info, audio, new_mood)
+        transformations = dataset_enhancements.generate_new_data(artist, title, audio, new_mood)
         
-        # Start processing transformations in a separate thread
+        # Start uploading data in a separate thread
         thread = threading.Thread(target=process_transformations, args=(transformations,))
         thread.start()
 

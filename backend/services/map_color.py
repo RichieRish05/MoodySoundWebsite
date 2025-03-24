@@ -91,7 +91,7 @@ def blend_colors(moods):
 
 
 
-__all__ = [get_moods_and_colors_from_mood_vector.__name__]
+__all__ = [get_moods_and_colors_from_mood_vector.__name__, get_significant_moods.__name__]
 
 
 if __name__ == "__main__":
