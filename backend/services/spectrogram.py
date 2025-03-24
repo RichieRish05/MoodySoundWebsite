@@ -5,40 +5,14 @@ import tempfile
 import torch
 
 
-
-def get_spectrogram_data(audio_url):
-    #Download the audio file
-    response = requests.get(audio_url)
-
-    # Save the file temporarily
-    with tempfile.NamedTemporaryFile(delete=True, suffix=".mp3") as temp_audio_file:
-        # Write the content of the audio file to the temporary file
-        temp_audio_file.write(response.content)
-
-        # Create a fake path for librosa to work with
-        temp_audio_path = temp_audio_file.name
-
-        # Load the temporary file with a predetermined sampling rate and a duration of 30 seconds to preprocess data
-        y, _ = librosa.load(temp_audio_path, sr=22050, duration=30)
-
-        # Normalize the audio waveform to a range of [-1, 1].
-        y_normalized = librosa.util.normalize(y)
-
-        # Obtain the spectrogram
-        spectrogram = generate_spectrogram(y_normalized)
-
-        return spectrogram
-    
-
-
-def generate_spectrogram(y, sr=22050, min_duration=10, max_duration=30, step=10):
+def generate_spectrogram(y, sr=22050, max_duration=30):
     # Target length in samples (30 seconds)
     target_length = sr * max_duration  
 
     # Format the audio to a standard shape (use y instead of audio)
     y = np.pad(y, (0, max(0, target_length - len(y))), mode='constant')[:target_length]
 
-    # Generate a Mel spectrogram based on the sliced audio
+    # Generate a Mel spectrogram based on the formatted audio
     S = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128, fmax=8000, dtype=np.float16)
 
     # Convert power to decibels
@@ -51,7 +25,7 @@ def generate_spectrogram(y, sr=22050, min_duration=10, max_duration=30, step=10)
 
 
 
-__all__ = [get_spectrogram_data.__name__]
+__all__ = [generate_spectrogram.__name__]
 
 
     

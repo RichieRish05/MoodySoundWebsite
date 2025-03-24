@@ -7,6 +7,7 @@ import threading
 import boto3
 import tempfile
 import numpy as np
+import librosa
 
 app = Flask(__name__)
 CORS(app)
@@ -26,13 +27,17 @@ def predict_mood():
     search_query = f"{song}, {artist}"
 
     # Get the song preview
-    audio_url = services.get_song_preview(search_query) #
+    audio_url = services.get_song_preview(search_query)
 
     if audio_url is None:
         return jsonify({'error': 'No audio URL found'}), 404
     
-    # Get the spectrogram
-    spectrogram = services.get_spectrogram_data(audio_url) # instead of passing audio url, pass audio itself
+    # Get the audio from the audio url
+    audio = services.get_audio(audio_url)
+    # Normalize the audio waveform to a range of [-1, 1].
+    audio = librosa.util.normalize(audio)
+    # Generate the spectrogram
+    spectrogram = services.generate_spectrogram(audio)
     
     # Get the mood prediction as a list
     with torch.no_grad():
@@ -45,79 +50,11 @@ def predict_mood():
     song_info["title"] = song
     song_info["artist"] = artist
 
-
+    # Return the moods, colors, and song information
     return jsonify(song_info)
 
 
-def upload_mood_to_s3(s3_client, file_name, mood):
-    """
-    A function to upload a mood to the s3 bucket
-    """
-    try:
-        with tempfile.NamedTemporaryFile(suffix='.npy', delete=True) as f:
-            # Save the mood to the temporary file
-            np.save(f.name, mood)
-            f.flush()  # Ensure all data is written to disk
 
-            # Upload the file to S3
-            s3_client.upload_file(
-                Filename=f.name,
-                Bucket='rishitestbucket01',
-                Key=f'data/targets/{file_name}'
-            )
-        return True
-    except Exception as e:
-        print(f"Error uploading spectrogram to S3: {str(e)}")
-        return False
-
-
-
-
-def upload_spec_to_s3(s3_client, file_name, spec):
-    """
-    A function to upload spectrograms to the s3 bucket
-    """
-    try:
-        with tempfile.NamedTemporaryFile(suffix='.npy', delete=True) as f:
-            # Save the spectrogram to the temporary file
-            np.save(f.name, spec)
-            f.flush()  # Ensure all data is written to disk
-
-            # Upload the file to S3
-            s3_client.upload_file(
-                Filename=f.name,
-                Bucket='rishitestbucket01',
-                Key=f'data/spectrograms/{file_name}'
-            )
-        return True
-    except Exception as e:
-        print(f"Error uploading spectrogram to S3: {str(e)}")
-        return False
-    
-
-
-def process_transformations(transformations):
-    """
-    A function to asynchronously process the new spectrogram
-    data and upload to s3
-    """
-    s3 = boto3.client('s3')
-    try:
-        for x in transformations:
-            # print(f"Spectrogram: {x['spectrogram']}")
-            # print(f"Mood: {x['mood']}")3
-            row = dataset_enhancements.create_row(
-                artist= x['artist'],
-                song_name= x['title'],
-                spec_path= x['spectrogram_file_name'],
-                target_path= x['target_file_name'],
-                comprehensive_mood=x['comprehensive_mood'])
-            
-            dataset_enhancements.write_to_table('TestMoodySoundTable', row)
-            # upload_spec_to_s3(s3_client=s3, file_name=x['spectrogram_file_name'], spec=x['spectrogram'])
-            # upload_mood_to_s3(s3_client=s3, file_name=x['target_file_name'], mood=x['mood'])
-    except Exception as e:
-        print(str(e))
 
 @app.post('/correctmood')
 def correct_mood():
@@ -141,18 +78,16 @@ def correct_mood():
         if audio_url is None:
             return jsonify({'error': 'No mood data available'}), 400
         
-
         # Generate new, corrected mood vector  
         new_mood = dataset_enhancements.generate_new_mood_vector(correct_moods, vector).tolist()
         # Get just the audio
-        audio = dataset_enhancements.get_audio(audio_url) # Move this into services
-
+        audio = services.get_audio(audio_url) 
 
         # Create the new data generator
         transformations = dataset_enhancements.generate_new_data(artist, title, audio, new_mood)
         
         # Start uploading data in a separate thread
-        thread = threading.Thread(target=process_transformations, args=(transformations,))
+        thread = threading.Thread(target=dataset_enhancements.process_transformations, args=(transformations,))
         thread.start()
 
         return jsonify({'new_mood': new_mood}) 
