@@ -1,5 +1,7 @@
 import boto3
 from botocore.exceptions import ClientError
+import datetime
+import csv
 
 # Create the DynamoDB resource 
 dynamodb = boto3.resource('dynamodb')
@@ -13,7 +15,8 @@ def enforce_keys(item):
         'artist',
         'spectrogram_file',
         'target_file',
-        'comprehensive_mood'
+        'comprehensive_mood',
+        'timestamp'
     }
 
     missing_keys = required_keys - set(item.keys())
@@ -29,11 +32,12 @@ def enforce_keys(item):
 def create_row(*, song_name, artist, spec_path, target_path, comprehensive_mood):
     # Create dictionary representing a row in the csv
     return {
-        "title": song_name,
-        "artist": artist,
         "spectrogram_file": spec_path,
         "target_file": target_path,
-        "comprehensive_mood": comprehensive_mood
+        "title": song_name,
+        "artist": artist,
+        "comprehensive_mood": comprehensive_mood,
+        "timestamp": datetime.datetime.now().isoformat()
     }
     
 
@@ -62,6 +66,10 @@ def write_to_table(table_name, item):
         return False
 
 
+def get_items(table):
+    response = table.scan()
+    return response.get('Items', [])
+
 def scan_table(table_name):
     """
     Function to scan all elements in the table
@@ -69,8 +77,7 @@ def scan_table(table_name):
     table = dynamodb.Table(table_name)
     
     # Retrieve all items in the table
-    response = table.scan()
-    items = response.get('Items', [])
+    items = get_items(table)
     
     # Print out the items
     print(f"Items in table {table_name}:")
@@ -78,6 +85,34 @@ def scan_table(table_name):
         print(item)
     
     return items
+
+def export_table_to_s3_as_csv(table_name):
+    """
+    A function to take an entire dynamodb table and export it to s3 in the form
+    of a csv
+    """
+    # Initialize the s3 client and get the table
+    s3 = boto3.client('s3')
+    table = dynamodb.Table(table_name)
+
+    # Retrieve all items in the table
+    items = get_items(table)
+
+    headers = [
+        'title',
+        'artist',
+        'spectrogram_file',
+        'target_file',
+        'comprehensive_mood',
+        'timestamp'
+    ]
+
+    with open('metadata.csv', 'w', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=headers)
+        writer.writeheader()
+        for item in items:
+            writer.writerow(item)
+
 
 def delete_item(table_name, key):
     """
@@ -91,15 +126,18 @@ def delete_item(table_name, key):
     return response
 
 
-__all__ = [write_to_table.__name__, ]
+    
+
+__all__ = [write_to_table.__name__]
 if __name__ == '__main__':
     table_name = 'TestMoodySoundTable'
+    # # List all items in the table
+    # items = scan_table(table_name)
     
-    # List all items in the table
-    items = scan_table(table_name)
+    # # Example: delete an item with primary key 'id' equal to '123'
+    # # key_to_delete = {'id': '123'}
+    # # delete_item(table_name, key_to_delete)
     
-    # Example: delete an item with primary key 'id' equal to '123'
-    # key_to_delete = {'id': '123'}
-    # delete_item(table_name, key_to_delete)
+    export_table_to_s3_as_csv(table_name)
 
 

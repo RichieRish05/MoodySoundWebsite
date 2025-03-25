@@ -3,7 +3,6 @@ import numpy as np
 from dataset_enhancements.transform_audio import normalize_audio, pitch_shift, time_stretch
 from dataset_enhancements.correct_mood import modify_mood
 from services import get_significant_moods
-import boto3
 
 
 def sanitize_song_name(song_name):
@@ -77,7 +76,7 @@ def generate_new_data(artist, title, y, corrected_mood_vector):
                 "spectrogram": np.array(spectrogram),
                 "mood": np.array(mood),
                 "artist": artist,
-                "title": f'{title}_{mood_type}',
+                "title": f'{title} {suffix}',
                 "comprehensive_mood": comprehensive_mood
             }
         except Exception as e:
@@ -85,34 +84,10 @@ def generate_new_data(artist, title, y, corrected_mood_vector):
             continue
 
 
-def upload_to_s3(file_name, bucket_name, object_name):
-    """
-    Upload a file to an S3 bucket
-    """
-    s3 = boto3.client('s3')
-    s3.upload_file(
-        Filename=file_name, 
-        Bucket=bucket_name, 
-        Key=object_name
-    )
-
-
 
 
 __all__ = [generate_new_data.__name__]
 
-if __name__ == '__main__':
-    # Get the audio url
-    audio_url = "https://cdnt-preview.dzcdn.net/api/1/1/6/3/6/0/63676ab7820760a38a0a30c4cbfe43b1.mp3?hdnea=exp=1741767512~acl=/api/1/1/6/3/6/0/63676ab7820760a38a0a30c4cbfe43b1.mp3*~data=user_id=0,application_id=42~hmac=2b043d386a35f36e51a4b90611f9b95d701f74e2763c19ca9dc3838b9b908e03"
-   
-
-    y = get_audio(audio_url)
-    mood = [0.5 for x in range(8)]
-
-    for x in generate_new_data("Free Mind, Tems", y, mood):
-        print(f"Name: {x['name']}")
-        print(f"Spectrogram: {x['spectrogram'].shape}")
-        print(f"Mood: {x['mood']}")
 
 
 

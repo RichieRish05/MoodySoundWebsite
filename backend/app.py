@@ -38,8 +38,7 @@ def predict_mood():
     audio = librosa.util.normalize(audio)
     # Generate the spectrogram
     spectrogram = services.generate_spectrogram(audio)
-    
-    # Get the mood prediction as a list
+    # Get the mood prediction vector as a list
     with torch.no_grad():
         mood = model(spectrogram).squeeze().tolist()
         

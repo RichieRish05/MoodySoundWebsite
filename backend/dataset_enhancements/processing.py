@@ -20,6 +20,8 @@ def upload_mood_to_s3(s3_client, file_name, mood):
                 Bucket='rishitestbucket01',
                 Key=f'data/targets/{file_name}'
             )
+        
+        print('Uploaded mood successfully')
         return True
     except Exception as e:
         print(f"Error uploading spectrogram to S3: {str(e)}")
@@ -44,6 +46,8 @@ def upload_spec_to_s3(s3_client, file_name, spec):
                 Bucket='rishitestbucket01',
                 Key=f'data/spectrograms/{file_name}'
             )
+        
+        print('Uploaded spectrogram succesfully')
         return True
     except Exception as e:
         print(f"Error uploading spectrogram to S3: {str(e)}")
@@ -66,11 +70,12 @@ def process_transformations(transformations):
                 song_name= x['title'],
                 spec_path= x['spectrogram_file_name'],
                 target_path= x['target_file_name'],
-                comprehensive_mood=x['comprehensive_mood'])
+                comprehensive_mood=x['comprehensive_mood']
+            )
             
             write_to_table('TestMoodySoundTable', row)
-            # upload_spec_to_s3(s3_client=s3, file_name=x['spectrogram_file_name'], spec=x['spectrogram'])
-            # upload_mood_to_s3(s3_client=s3, file_name=x['target_file_name'], mood=x['mood'])
+            upload_spec_to_s3(s3_client=s3, file_name=x['spectrogram_file_name'], spec=x['spectrogram'])
+            upload_mood_to_s3(s3_client=s3, file_name=x['target_file_name'], mood=x['mood'])
         except Exception as e:
             print(f"Error processing transformation: {str(e)}")
             continue
