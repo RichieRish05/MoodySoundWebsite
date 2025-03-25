@@ -129,15 +129,6 @@ def delete_item(table_name, key):
     
 
 __all__ = [write_to_table.__name__]
-if __name__ == '__main__':
-    table_name = 'TestMoodySoundTable'
-    # # List all items in the table
-    # items = scan_table(table_name)
-    
-    # # Example: delete an item with primary key 'id' equal to '123'
-    # # key_to_delete = {'id': '123'}
-    # # delete_item(table_name, key_to_delete)
-    
-    export_table_to_s3_as_csv(table_name)
+
 
 

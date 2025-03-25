@@ -84,8 +84,6 @@ def generate_new_data(artist, title, y, corrected_mood_vector):
             continue
 
 
-
-
 __all__ = [generate_new_data.__name__]
 
 

@@ -2,7 +2,10 @@ import numpy as np
 import tempfile
 import boto3
 from dataset_enhancements.table import create_row, write_to_table
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 
 def upload_mood_to_s3(s3_client, file_name, mood):
     """
@@ -17,7 +20,7 @@ def upload_mood_to_s3(s3_client, file_name, mood):
             # Upload the file to S3
             s3_client.upload_file(
                 Filename=f.name,
-                Bucket='rishitestbucket01',
+                Bucket=os.getenv('S3_BUCKET_NAME'),
                 Key=f'data/targets/{file_name}'
             )
         
@@ -43,7 +46,7 @@ def upload_spec_to_s3(s3_client, file_name, spec):
             # Upload the file to S3
             s3_client.upload_file(
                 Filename=f.name,
-                Bucket='rishitestbucket01',
+                Bucket=os.getenv('S3_BUCKET_NAME'),
                 Key=f'data/spectrograms/{file_name}'
             )
         
@@ -63,8 +66,6 @@ def process_transformations(transformations):
     s3 = boto3.client('s3')
     for x in transformations:
         try:
-            # print(f"Spectrogram: {x['spectrogram']}")
-            # print(f"Mood: {x['mood']}")3
             row = create_row(
                 artist= x['artist'],
                 song_name= x['title'],
@@ -73,7 +74,7 @@ def process_transformations(transformations):
                 comprehensive_mood=x['comprehensive_mood']
             )
             
-            write_to_table('TestMoodySoundTable', row)
+            write_to_table(os.getenv('TABLE_NAME'), row)
             upload_spec_to_s3(s3_client=s3, file_name=x['spectrogram_file_name'], spec=x['spectrogram'])
             upload_mood_to_s3(s3_client=s3, file_name=x['target_file_name'], mood=x['mood'])
         except Exception as e:

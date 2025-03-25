@@ -36,6 +36,6 @@ def get_song_preview(query: str) -> str:
     
 
 # Testing
-#print(get_song_preview("Free Mind, Tems"))
+# print(get_song_preview("Nokia, Drake"))
 
 __all__ = [get_song_preview.__name__]
