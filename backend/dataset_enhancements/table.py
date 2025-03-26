@@ -75,6 +75,7 @@ def scan_table(table_name):
     Function to scan all elements in the table
     """
     table = dynamodb.Table(table_name)
+    count = 0
     
     # Retrieve all items in the table
     items = get_items(table)
@@ -82,7 +83,10 @@ def scan_table(table_name):
     # Print out the items
     print(f"Items in table {table_name}:")
     for item in items:
+        count += 1
         print(item)
+
+    print(f'Count: {count}')
     
     return items
 
@@ -132,3 +136,5 @@ __all__ = [write_to_table.__name__]
 
 
 
+if __name__ == '__main__':
+    scan_table('moodysoundtable')

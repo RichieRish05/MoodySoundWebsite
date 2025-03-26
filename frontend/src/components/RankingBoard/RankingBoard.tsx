@@ -61,6 +61,8 @@ const RankingBoard: React.FC<RankingBoardProps> = ({ moods, numPlaces, hideRanki
         const config = {
             moods: droppedMoods,
             songInfo: songInfo.songName,
+            title: songInfo.title,
+            artist: songInfo.artist,
             vector: songInfo.vector
         };
 

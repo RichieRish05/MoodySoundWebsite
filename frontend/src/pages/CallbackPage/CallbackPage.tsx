@@ -14,6 +14,7 @@ interface PlaybackState {
     artistName: string;
     albumName: string;
     imageUrl: string;
+    previewUrl: string | null;
 }
 
 interface TokenResponse {
@@ -40,6 +41,7 @@ const parsePlaybackState = (playbackState: any): PlaybackState | null => {
             artistName: playbackState.item.artists.map((artist) => artist.name).join(', '),
             albumName: playbackState.item.album.name,
             imageUrl: playbackState.item.album.images[0].url,
+            previewUrl: playbackState.item.preview_url
         }
     }
 
@@ -80,8 +82,10 @@ const CallbackPage: React.FC = () => {
     const [retrievalError, setRetrievalError] = useState<boolean>(false);
     const [displayRankingBoard, setDisplayRankingBoard] = useState<boolean>(false);
     const [showRecButtons, setShowRecButtons] = useState<boolean>(true);
+    const [recBoardKey, setRecBoardKey] = useState<number>(0); // key to force reload of rec board when playback state changes
 
 
+    // Effect to get the spotify access token on first load
     useEffect(() => {
         const tokens = getTokenFromUrl();
         if (tokens.access_token) {
@@ -104,6 +108,9 @@ const CallbackPage: React.FC = () => {
 
                 if (!arePlaybackStatesEqual(lastPlaybackState, currentPlaybackState)) {
                     setPlaybackState(currentPlaybackState);
+                    setShowRecButtons(true)
+                    setRecBoardKey(prev => prev + 1)
+                    setDisplayRankingBoard(false)
                     lastPlaybackState = currentPlaybackState; // Update lastPlaybackState only if it changes
                 }
             } catch (error) {
@@ -128,20 +135,26 @@ const CallbackPage: React.FC = () => {
             */
             const mood = await axios.get(`${BACKEND_URL}/mood?song=${songName}&artist=${artistName}`)
                 .then((res) => {
-                    console.log(res.data); // Log the response data
-                    setRetrievalError(false); // Set retrieval error to false
-                    setMood(res.data.significant_moods); // Set the mood
-                    setSongInfo({songName: res.data.search_query, vector: res.data.vector}); // Set the song info
-                    setColor(res.data.color); // Set the color
+                    setRetrievalError(false);
+                    setMood(res.data.significant_moods);
+                    setSongInfo({
+                        songName: res.data.search_query,
+                        title: res.data.title,
+                        artist: res.data.artist,
+                        vector: res.data.vector
+                    });
+                    setColor(res.data.color);
+                    setShowRecButtons(true);
+                    setRecBoardKey(prev => prev + 1) // Force reload of rec board
                     return res.data;
-
                 })
                 .catch((err) => {
-                    setRetrievalError(true); // Set retrieval error to true
-                    setMood(null); // Set the mood to null
-                    setColor("#FFFFFF") // Set the color to white
-                    console.error(err); // Log the error
-                    
+                    console.log('NO URL')
+                    setRetrievalError(true);
+                    setMood(null);
+                    setColor("#FFFFFF");
+                    setShowRecButtons(false);
+                    setRecBoardKey(prev => prev + 1) // Force reload of rec board
                     return null;
                 });
 
@@ -150,7 +163,6 @@ const CallbackPage: React.FC = () => {
 
         if (playbackState) {
             fetchAndSetMood(playbackState.songName, playbackState.artistName);
-            setShowRecButtons(true); // Set the show reccomendation buttons to true
         }
 
         
@@ -212,6 +224,7 @@ const CallbackPage: React.FC = () => {
                                 />
                             ) : (
                                 <RecommendationsCard 
+                                    key={recBoardKey}
                                     hideRankingBoard={setDisplayRankingBoard}
                                     showButtons={showRecButtons} 
                                 />

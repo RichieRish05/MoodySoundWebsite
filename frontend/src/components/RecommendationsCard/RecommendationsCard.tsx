@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import './RecommendationsCard.css'
 interface RecommendationsCardProps {
+  key: number;
   hideRankingBoard: (arg: boolean) => void;
-  showButtons: boolean
+  showButtons: boolean;
 }
 
 const RecommendationsCard: React.FC<RecommendationsCardProps> = ({hideRankingBoard, showButtons}) => {
