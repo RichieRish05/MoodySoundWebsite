@@ -1,5 +1,5 @@
 import boto3
-from botocore.exceptions import ClientError
+from boto3.dynamodb.conditions import Attr
 import datetime
 import csv
 
@@ -16,7 +16,8 @@ def enforce_keys(item):
         'spectrogram_file',
         'target_file',
         'comprehensive_mood',
-        'timestamp'
+        'dominant_mood',
+        'date'
     }
 
     missing_keys = required_keys - set(item.keys())
@@ -27,43 +28,44 @@ def enforce_keys(item):
     
     return True
 
+def create_mood_search(comprehensive_mood):
+    return ', '.join(i.strip() for i in sorted(comprehensive_mood.split(',')))
 
 
 def create_row(*, song_name, artist, spec_path, target_path, comprehensive_mood):
     # Create dictionary representing a row in the csv
+
     return {
         "spectrogram_file": spec_path,
         "target_file": target_path,
         "title": song_name,
         "artist": artist,
         "comprehensive_mood": comprehensive_mood,
-        "timestamp": datetime.datetime.now().isoformat()
+        "dominant_mood": comprehensive_mood.split(', ')[0], # Create a key to query later in a GSI
+        "date": datetime.datetime.now().strftime("%Y-%m-%d")  # Format: YYYY-MM-DD
     }
     
 
 def write_to_table(table_name, item):
     """
-    A function to write an item to a specified dynamodb table
+    Writes an item to a DynamoDB table.
     """
+    # if not enforce_keys(item):
+    #     print('Missing keys')
+    #     return False
+
     table = dynamodb.Table(table_name)
 
-    if not enforce_keys(item):
-        print('Missing keys')
+    try:
+        response = table.put_item(
+            Item = item
+        )
+        print(f'Wrote to {table_name} succesfully')
+        return True
+    except Exception as e:
+        print(f"Error writing to {table_name}: {e}")
         return False
 
-    
-    try:
-        table.put_item(
-            Item=item
-        )
-        print('Wrote to table successfully')
-        return True
-    except ClientError as e:
-        print(f"Error writing to table: {e.response['Error']['Message']}")
-        return False
-    except Exception as e:
-        print(f"Unexpected error: {str(e)}")
-        return False
 
 
 def get_items(table):
@@ -109,6 +111,7 @@ def export_table_to_s3_as_csv(table_name):
         'target_file',
         'comprehensive_mood',
         'timestamp'
+        'date'
     ]
 
     with open('metadata.csv', 'w', newline='') as file:
@@ -129,7 +132,28 @@ def delete_item(table_name, key):
     print(f"Deleted item with key: {key}")
     return response
 
-
+def delete_all_items(table_name):
+    """
+    Function to delete all items from a DynamoDB table
+    """
+    table = dynamodb.Table(table_name)
+    
+    # First, scan the table to get all items
+    items = get_items(table)
+    deleted_count = 0
+    
+    # For each item, create the key dictionary and delete it
+    for item in items:
+        try:
+            # Assuming 'title' is your primary key
+            key = {'title': item['title']}
+            table.delete_item(Key=key)
+            deleted_count += 1
+        except Exception as e:
+            print(f"Error deleting item {item.get('title')}: {e}")
+    
+    print(f"Successfully deleted {deleted_count} items from {table_name}")
+    return deleted_count
     
 
 __all__ = [write_to_table.__name__]
@@ -137,4 +161,11 @@ __all__ = [write_to_table.__name__]
 
 
 if __name__ == '__main__':
-    scan_table('moodysoundtable')
+    # delete_all_items('moodysoundcsv')
+    # delete_all_items('moodysoundqueries')
+    scan_table('moodysoundcsv')
+    scan_table('moodysoundqueries')
+    # mood = "party, danceable, mood_happy"
+    # print(create_mood_search(mood))
+
+

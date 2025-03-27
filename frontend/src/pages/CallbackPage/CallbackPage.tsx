@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import SpotifyWebApi from 'spotify-web-api-js';
 import axios from 'axios';
 import './CallbackPage.css';
@@ -58,6 +58,7 @@ const fetchPlaybackState = async (spotifyApi: SpotifyWebApi.SpotifyWebApiJs): Pr
 }
 
 
+
 const arePlaybackStatesEqual = (state1: PlaybackState | null, state2: PlaybackState | null): boolean => {
     // If both states are null, they're equal
     if (state1 === null && state2 === null) return true;
@@ -72,6 +73,7 @@ const arePlaybackStatesEqual = (state1: PlaybackState | null, state2: PlaybackSt
 
 
 
+
 const CallbackPage: React.FC = () => {
     const spotifyApi = new SpotifyWebApi();
     const [spotifyToken, setSpotifyToken] = useState<string | null>(null);
@@ -81,8 +83,9 @@ const CallbackPage: React.FC = () => {
     const [color, setColor] = useState<string | null>("#FFFFFF");
     const [retrievalError, setRetrievalError] = useState<boolean>(false);
     const [displayRankingBoard, setDisplayRankingBoard] = useState<boolean>(false);
-    const [showRecButtons, setShowRecButtons] = useState<boolean>(true);
+    const [showRecButtons, setShowRecButtons] = useState<boolean>(false);
     const [recBoardKey, setRecBoardKey] = useState<number>(0); // key to force reload of rec board when playback state changes
+    const [recSong, setRecSong] = useState<Record<string, any>>({});
 
 
     // Effect to get the spotify access token on first load
@@ -129,14 +132,11 @@ const CallbackPage: React.FC = () => {
     // Effect to fetch the mood of the current song and set the state
     useEffect(() => {
         const fetchAndSetMood = async (songName: string, artistName: string) => {
-            /*
-            This function fetches the mood of the current song from the backend
-            and sets the mood, color, and song info in the state
-            */
             const mood = await axios.get(`${BACKEND_URL}/mood?song=${songName}&artist=${artistName}`)
                 .then((res) => {
                     setRetrievalError(false);
                     setMood(res.data.significant_moods);
+                    console.log(res.data)
                     setSongInfo({
                         songName: res.data.search_query,
                         title: res.data.title,
@@ -145,16 +145,16 @@ const CallbackPage: React.FC = () => {
                     });
                     setColor(res.data.color);
                     setShowRecButtons(true);
-                    setRecBoardKey(prev => prev + 1) // Force reload of rec board
+                    setRecBoardKey(prev => prev + 1)
                     return res.data;
                 })
                 .catch((err) => {
-                    console.log('NO URL')
                     setRetrievalError(true);
                     setMood(null);
                     setColor("#FFFFFF");
                     setShowRecButtons(false);
-                    setRecBoardKey(prev => prev + 1) // Force reload of rec board
+                    setRecBoardKey(prev => prev + 1)
+                    console.error(err)
                     return null;
                 });
 
@@ -164,9 +164,32 @@ const CallbackPage: React.FC = () => {
         if (playbackState) {
             fetchAndSetMood(playbackState.songName, playbackState.artistName);
         }
+    }, [playbackState]);
 
-        
-    }, [playbackState])
+    // Effect for fetching similar songs
+    useEffect(() => {
+        console.log('Similar Songs Effect Triggered')
+        const fetchAndSetMatchedSong = async (dominantMoods: Array<number>): Promise<void> => {
+            try {
+                console.log('Fetching with moods:', dominantMoods);
+                const res = await axios.get(`${BACKEND_URL}/similarsong`, {
+                    params: {
+                        moods: dominantMoods.join(',')
+                    }
+                });
+                console.log('API Response:', res.data);
+                setRecSong(res.data);
+                console.log('Updated recSong and key:', res.data, recBoardKey);
+            } catch (err) {
+                console.error('Error fetching similar song:', err);
+            }
+        };
+
+        if (mood) {
+            fetchAndSetMatchedSong(mood);
+            setRecBoardKey(prev => prev + 1);
+        }
+    }, [mood]);
 
 
     // Effect to set the background color each time the color changes
@@ -181,8 +204,7 @@ const CallbackPage: React.FC = () => {
         };
     }, [color]);
 
-
-
+    
     // Moods for the ranking board
     const moods = [
         "Happy", "Party", "Relaxed", "Sad",
@@ -220,14 +242,18 @@ const CallbackPage: React.FC = () => {
                                     numPlaces={3}
                                     toggleButtons={setShowRecButtons}
                                     songInfo={songInfo}
-
+                                    setMood={setMood}
+                                    setColor={setColor}
                                 />
                             ) : (
+         
                                 <RecommendationsCard 
                                     key={recBoardKey}
                                     hideRankingBoard={setDisplayRankingBoard}
-                                    showButtons={showRecButtons} 
+                                    showButtons={showRecButtons}
+                                    recSong={recSong}
                                 />
+                  
                             )}
                         </>
                     )}

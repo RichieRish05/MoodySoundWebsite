@@ -10,9 +10,11 @@ interface RankingBoardProps {
     hideRankingBoard: (arg: boolean) => void;
     toggleButtons: (arg: boolean) => void;
     songInfo: Object;
+    setMood: (arg: Array<string>) => void
+    setColor: (arg: string) => void
 }
 
-const RankingBoard: React.FC<RankingBoardProps> = ({ moods, numPlaces, hideRankingBoard, toggleButtons, songInfo}) => {
+const RankingBoard: React.FC<RankingBoardProps> = ({ moods, numPlaces, hideRankingBoard, toggleButtons, songInfo, setMood, setColor}) => {
     const [availableMoods, setAvailableMoods] = useState(moods)
     const [droppedMoods, setDroppedMoods] = useState<Record<number, string | null>>(() => {
         const initialMoods: Record<number, string | null> = {};
@@ -41,8 +43,6 @@ const RankingBoard: React.FC<RankingBoardProps> = ({ moods, numPlaces, hideRanki
 
     const handleClick = (event: React.MouseEvent) => {
         event.preventDefault()
-        console.log('ACCESSED')
-        console.log(droppedMoods)
         setDroppedMoods(() => {
             const initialMoods: Record<number, string | null> = {};
             for (let i = 1; i <= numPlaces; i++) {
@@ -69,6 +69,9 @@ const RankingBoard: React.FC<RankingBoardProps> = ({ moods, numPlaces, hideRanki
         axios.post(import.meta.env.VITE_BACKEND_URL + '/correctmood', config)
             .then(response => {
                 console.log(response.data);
+                setMood(response.data.significant_moods)
+                setColor(response.data.color)
+
             })
             .catch(error => {
                 console.error('Error details:', error.response || error);

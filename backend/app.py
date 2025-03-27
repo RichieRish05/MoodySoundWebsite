@@ -5,6 +5,8 @@ import services
 import dataset_enhancements
 import threading
 import librosa
+import os
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 CORS(app)
@@ -74,23 +76,55 @@ def correct_mood():
         if audio_url is None:
             return jsonify({'error': 'No mood data available'}), 400
         
-        # Generate new, corrected mood vector  
-        new_mood = dataset_enhancements.generate_new_mood_vector(correct_moods, vector).tolist()
+        # Generate new, corrected mood vector and get the dominant mood
+        new_mood_vector = dataset_enhancements.generate_new_mood_vector(correct_moods, vector).tolist()
         # Get just the audio
         audio = services.get_audio(audio_url) 
 
         # Create the new data generator
-        transformations = dataset_enhancements.generate_new_data(artist, title, audio, new_mood)
+        transformations = dataset_enhancements.generate_new_data(artist, title, audio, new_mood_vector)
         
         # Start uploading data in a separate thread
-        thread = threading.Thread(target=dataset_enhancements.process_transformations, args=(transformations,))
+        thread = threading.Thread(
+            target=dataset_enhancements.handle_transformations_and_uploads,
+            args=(transformations, title, artist, new_mood_vector)
+        )
         thread.start()
 
-        return jsonify({'new_mood': new_mood}) 
+
+
+        song_info = services.get_moods_and_colors_from_mood_vector(new_mood_vector)
+        return jsonify(song_info) 
     
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
+@app.get('/similarsong')
+def get_similar_song():
+    moods = request.args.get('moods')
+    moods = moods.split(',')
+
+    song = services.select_song_that_matches_mood(os.getenv('QUERY_TABLE_NAME'), moods)
+    print(song)
+
+    if song:
+        return jsonify({
+            'title': song['title'],
+            'artist': song['artist'],
+        }), 200
+
+
+    return jsonify({'error': 'No matched song'}), 400
+
+
+    
+
+
+    
+
+
+
 
 if __name__ == '__main__':
+    load_dotenv()
     app.run(host='0.0.0.0', port=8000, debug=True)

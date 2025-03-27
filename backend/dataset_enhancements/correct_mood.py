@@ -101,7 +101,7 @@ def modify_mood(mood_vector, transformation_type: str):
     Modify the mood vector based on the specified transformation type.
     """
 
-    # Make a copy to 
+    # Make a copy
     mood_vector = np.array(mood_vector).copy()
     # Define mood positions for easy reference
     MOOD_POSITIONS = {
@@ -124,13 +124,14 @@ def modify_mood(mood_vector, transformation_type: str):
         'slow_down': ['sad', 'relaxed']
     }
 
-    # Apply the transformation
+    
     for mood in TRANSFORMATIONS[transformation_type]:
-        mood_vector[MOOD_POSITIONS[mood]] = max(0.25, mood_vector[MOOD_POSITIONS[mood]] * 1.25)
+        current_value = max(0.25, mood_vector[MOOD_POSITIONS[mood]] * 1.25)
+        mood_vector[MOOD_POSITIONS[mood]] = current_value
+        
 
-
-    # Return normalized vector
-    return normalize_mood(mood_vector)
+    # Return normalized vector and dominant mood
+    return normalize_mood(mood_vector).tolist()
 
 
 

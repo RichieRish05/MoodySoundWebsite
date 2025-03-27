@@ -4,6 +4,7 @@ import boto3
 from dataset_enhancements.table import create_row, write_to_table
 from dotenv import load_dotenv
 import os
+import services
 
 load_dotenv()
 
@@ -64,22 +65,68 @@ def process_transformations(transformations):
     data and upload to s3
     """
     s3 = boto3.client('s3')
+    # Track the last processed transformation
+    
     for x in transformations:
         try:
             row = create_row(
-                artist= x['artist'],
-                song_name= x['title'],
-                spec_path= x['spectrogram_file_name'],
-                target_path= x['target_file_name'],
+                artist=x['artist'],
+                song_name=x['title'],
+                spec_path=x['spectrogram_file_name'],
+                target_path=x['target_file_name'],
                 comprehensive_mood=x['comprehensive_mood']
             )
             
-            write_to_table(os.getenv('TABLE_NAME'), row)
             upload_spec_to_s3(s3_client=s3, file_name=x['spectrogram_file_name'], spec=x['spectrogram'])
             upload_mood_to_s3(s3_client=s3, file_name=x['target_file_name'], mood=x['mood'])
+            write_to_table(os.getenv('CSV_TABLE_NAME'), row)
+            last_processed = x
         except Exception as e:
             print(f"Error processing transformation: {str(e)}")
             continue
 
 
-__all__ = [process_transformations.__name__]
+
+def get_dominant_mood(mood_vector):
+    MOOD_POSITIONS = {
+        0: "danceable",
+        1: "mood_acoustic",
+        2: "mood_aggressive",
+        3: "mood_electronic",
+        4: "mood_happy",
+        5: "mood_party",
+        6: "mood_relaxed",
+        7: "mood_sad"
+    }
+
+    max_index = None
+    max = -float('inf')
+
+    for i in range(len(mood_vector)):
+        if mood_vector[i] > max:
+            max = mood_vector[i]
+            max_index = i
+    
+    return MOOD_POSITIONS[max_index]
+
+
+def handle_transformations_and_uploads(transformations, title, artist, mood_vector):
+    process_transformations(transformations)
+
+    # Write to the query table
+    write_to_table(os.getenv('QUERY_TABLE_NAME'), item={
+        'title': title,
+        'artist': artist,
+        'dominant_mood': get_dominant_mood(mood_vector)
+    })
+    print(title)
+    print(artist)
+    print(get_dominant_mood(mood_vector))
+
+
+    
+
+
+
+
+__all__ = [handle_transformations_and_uploads.__name__]

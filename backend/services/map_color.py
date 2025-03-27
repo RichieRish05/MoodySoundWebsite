@@ -36,25 +36,24 @@ def get_significant_moods(mood_vector: list):
     MAX_VALUE = max(mood_vector)
     THRESHOLD = MAX_VALUE * 0.8
 
-    # Convert mood vector to dictionary
+    # Convert mood vector to dictionary and filter by threshold
     significant_moods = {label: value for label, value in zip(MOOD_POSITIONS, mood_vector) if value > THRESHOLD}
+    
+    # Sort moods by value and take top 3
     sorted_moods = sorted(significant_moods.items(), key=lambda x: x[1], reverse=True)
-
-
-
+    top_3_moods = dict(sorted_moods[:3])
 
     # If both happy and sad are in the significant moods, remove the one with the lower value
-    if 'mood_happy' in significant_moods and 'mood_sad' in significant_moods:
-        mood_happy_value = significant_moods['mood_happy']
-        mood_sad_value = significant_moods['mood_sad']
+    if 'mood_happy' in top_3_moods and 'mood_sad' in top_3_moods:
+        mood_happy_value = top_3_moods['mood_happy']
+        mood_sad_value = top_3_moods['mood_sad']
 
         if mood_happy_value > mood_sad_value:
-            significant_moods.pop('mood_sad')
+            top_3_moods.pop('mood_sad')
         else:
-            significant_moods.pop('mood_happy')
+            top_3_moods.pop('mood_happy')
 
-
-    return significant_moods
+    return top_3_moods
 
 
 
