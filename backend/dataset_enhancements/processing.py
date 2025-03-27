@@ -4,7 +4,6 @@ import boto3
 from dataset_enhancements.table import create_row, write_to_table
 from dotenv import load_dotenv
 import os
-import services
 
 load_dotenv()
 
@@ -80,7 +79,6 @@ def process_transformations(transformations):
             upload_spec_to_s3(s3_client=s3, file_name=x['spectrogram_file_name'], spec=x['spectrogram'])
             upload_mood_to_s3(s3_client=s3, file_name=x['target_file_name'], mood=x['mood'])
             write_to_table(os.getenv('CSV_TABLE_NAME'), row)
-            last_processed = x
         except Exception as e:
             print(f"Error processing transformation: {str(e)}")
             continue
@@ -102,7 +100,7 @@ def get_dominant_mood(mood_vector):
     max_index = None
     max = -float('inf')
 
-    for i in range(len(mood_vector)):
+    for i in range(1, len(mood_vector)): # Ignore danceable because it blends with too many moods well
         if mood_vector[i] > max:
             max = mood_vector[i]
             max_index = i
