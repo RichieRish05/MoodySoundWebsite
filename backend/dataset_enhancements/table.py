@@ -110,7 +110,7 @@ def export_table_to_s3_as_csv(table_name):
         'spectrogram_file',
         'target_file',
         'comprehensive_mood',
-        'timestamp'
+        'dominant_mood',
         'date'
     ]
 
@@ -163,9 +163,10 @@ __all__ = [write_to_table.__name__]
 if __name__ == '__main__':
     # delete_all_items('moodysoundcsv')
     # delete_all_items('moodysoundqueries')
-    scan_table('moodysoundcsv')
-    scan_table('moodysoundqueries')
+    # scan_table('moodysoundcsv')
+    # scan_table('moodysoundqueries')
     # mood = "party, danceable, mood_happy"
     # print(create_mood_search(mood))
+    export_table_to_s3_as_csv('moodysoundcsv')
 
 

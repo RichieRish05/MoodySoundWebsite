@@ -4,9 +4,31 @@ import boto3
 from dataset_enhancements.table import create_row, write_to_table
 from dotenv import load_dotenv
 import os
+import time
 
 load_dotenv()
 
+def with_retries(n, delay = 1):
+    """
+    Retry a function n times with exponential backoff.
+    """
+    def decorate(func):
+        def run(*args, **kwargs):
+            for i in range(n-1):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    time.sleep(delay * (2 ** i))  # Exponential backoff
+                    continue
+            return func(*args, **kwargs)
+        return run
+    return decorate
+    
+
+
+
+
+@with_retries(3)
 def upload_mood_to_s3(s3_client, file_name, mood):
     """
     A function to upload moods to the s3 bucket
@@ -32,7 +54,7 @@ def upload_mood_to_s3(s3_client, file_name, mood):
 
 
 
-
+@with_retries(3)
 def upload_spec_to_s3(s3_client, file_name, spec):
     """
     A function to upload spectrograms to the s3 bucket
