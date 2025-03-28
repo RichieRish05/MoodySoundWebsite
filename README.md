@@ -57,11 +57,6 @@ MoodySound is a web application that analyzes the mood of your currently playing
 - Relaxed
 - Sad
 
-
-## Setup and Installation 🚀
-
-1. **Clone the repository**
-
 ## Contributing 🤝
 
 Contributions are welcome! Please feel free to submit a Pull Request.
