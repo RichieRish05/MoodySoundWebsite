@@ -1,6 +1,6 @@
-# MoodySound 🎵
+# MoodySoundWebsite 🎵
 
-MoodySound is a web application that analyzes the mood of your currently playing Spotify songs using machine learning. It provides real-time mood analysis, color visualization, and song recommendations based on mood patterns.
+MoodySoundWebsite is a web application that analyzes the mood of your currently playing Spotify songs using machine learning. It provides real-time mood analysis, color visualization, and song recommendations based on mood patterns.
 
 ## Features 🌟
 
