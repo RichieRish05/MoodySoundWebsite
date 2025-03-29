@@ -1,5 +1,4 @@
 import './HomePage.css';
-import Starfield from '../../components/starfield';
 
 
 const HomePage = () => {
@@ -17,20 +16,44 @@ const HomePage = () => {
   };
 
   return (
-    <div className="home-page-wrapper d-flex flex-column align-items-center justify-content-center">
-      <h1 className="shimmer-text text-center fixed-top mt-5">Welcome to Moodify</h1>
+    <div className="home-page-wrapper">
+     <div className="main-box">
+       <div className="audio-wave">
+         <span></span>
+         <span></span>
+         <span></span>
+         <span></span>
+         <span></span>
+       </div>
 
-      <div onClick={handleLogin} className="spotify-button" style={{position: 'relative', zIndex: 1}} >
-        <img src="/spotify-logo.png" alt="Spotify Logo" className="spotify-logo" />
-        Login with Spotify
-      </div>
 
-      <Starfield />
-    </div>
+       <div className="box-content">
+         <h1 className="box-title">Welcome to MoodySound AI</h1>
+         <p className="subtitle">Bringing Connection Through AI</p>
 
 
-  );
+         <div
+           onClick={handleLogin}
+           className="spotify-button"
+           role="button"
+           tabIndex={0}
+           onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+         >
+           <img
+             src="/spotify-logo.png"
+             alt="Spotify Logo"
+             className="spotify-logo"
+           />
+          Login with Spotify
+         </div>
+       </div>
+     </div>
+   </div>
+ );
 };
+
+
+
 
 export default HomePage;
 

@@ -57,9 +57,6 @@ MoodySound is a web application that analyzes the mood of your currently playing
 - Relaxed
 - Sad
 
-
-## Setup and Installation 🚀
-
 1. **Clone the repository**
 
 ## Contributing 🤝
@@ -79,7 +76,7 @@ Rishi Murumkar - [rmurumka@uci.edu]
 
 ## Acknowledgments 🙏
 
-- Special thanks to the UCI Department of Computer Science for their support
+- Special thanks to the UCI Department of Computer Science 
 - ZOT ZOT ZOT!
 
 
