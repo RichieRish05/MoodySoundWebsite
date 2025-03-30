@@ -104,6 +104,8 @@ def get_similar_song():
     moods = request.args.get('moods')
     moods = moods.split(',')
 
+    if len(moods) == 1 and moods[0] == 'danceable':
+        moods = ['mood_party']
     song = services.select_song_that_matches_mood(os.getenv('QUERY_TABLE_NAME'), moods)
     print(song)
 

@@ -163,6 +163,9 @@ const CallbackPage: React.FC = () => {
 
         if (playbackState) {
             fetchAndSetMood(playbackState.songName, playbackState.artistName);
+        } else {
+            setMood(null);
+            setColor("#FFFFFF");
         }
     }, [playbackState]);
 

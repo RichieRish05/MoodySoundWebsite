@@ -34,7 +34,7 @@ MOOD_POSITIONS = [
 
 def get_significant_moods(mood_vector: list):
     MAX_VALUE = max(mood_vector)
-    THRESHOLD = MAX_VALUE * 0.8
+    THRESHOLD = MAX_VALUE * 0.75
 
     # Convert mood vector to dictionary and filter by threshold
     significant_moods = {label: value for label, value in zip(MOOD_POSITIONS, mood_vector) if value > THRESHOLD}
