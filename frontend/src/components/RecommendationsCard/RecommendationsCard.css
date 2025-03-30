@@ -1,19 +1,18 @@
 .card {
-    /* Increase size by scaling it up 20% */
-    width: 700px; /* Adjust width as needed */
-    height: 390px;
-    padding: 20px; /* Increase padding for more space */
-    
-    /* Replace opacity with semi-transparent background */
-    background-color: rgba(255, 255, 255, 0.5); /* White with 0.4 opacity */
-    
-    /* Shift the card to the right by auto margin on the left */
+    width: 90vw;          /* Use viewport width instead of fixed pixels */
+    max-width: 700px;     /* Maximum width */
+    min-width: 280px;     /* Minimum width for very small screens */
+    height: auto;         /* Allow height to adjust based on content */
+    min-height: 390px;    /* Minimum height */
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.5);
     margin-left: auto;
-    
-    /* Optional: additional styling */
-    max-width: 90%;  /* Prevents the card from stretching too far */
     border-radius: 8px;
-  }
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
 .hidden {
     display: none;
@@ -36,4 +35,38 @@
 
 .reccomendation-button {
   background-color: rgba(255, 255, 255, 0.4)
+}
+
+/* Add media queries for different screen sizes */
+@media screen and (max-width: 768px) {
+    .reccomended-song-cover-w-buttons {
+        width: 120px;
+        height: 120px;
+    }
+
+    .reccomended-song-cover-no-buttons {
+        width: 160px;
+        height: 160px;
+    }
+
+    .reccomendation-button {
+        width: 80%;
+        max-width: 180px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .card {
+        padding: 15px;
+    }
+
+    .reccomended-song-cover-w-buttons {
+        width: 100px;
+        height: 100px;
+    }
+
+    .reccomended-song-cover-no-buttons {
+        width: 140px;
+        height: 140px;
+    }
 }
