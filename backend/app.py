@@ -107,12 +107,15 @@ def get_similar_song():
     if len(moods) == 1 and moods[0] == 'danceable':
         moods = ['mood_party']
     song = services.select_song_that_matches_mood(os.getenv('QUERY_TABLE_NAME'), moods)
-    print(song)
+    spotify_info = services.get_track_album_cover_by_search(song['title'], song['artist'])
+    
 
     if song:
         return jsonify({
             'title': song['title'],
             'artist': song['artist'],
+            'albumCover': spotify_info['album_cover'],
+            'url': spotify_info['url']
         }), 200
 
 

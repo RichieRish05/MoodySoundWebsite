@@ -8,5 +8,6 @@ flask-cors
 requests
 webcolors
 boto3
+spotipy
 
 

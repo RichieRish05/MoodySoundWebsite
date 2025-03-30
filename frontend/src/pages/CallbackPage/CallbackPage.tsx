@@ -180,9 +180,7 @@ const CallbackPage: React.FC = () => {
                         moods: dominantMoods.join(',')
                     }
                 });
-                console.log('API Response:', res.data);
                 setRecSong(res.data);
-                console.log('Updated recSong and key:', res.data, recBoardKey);
             } catch (err) {
                 console.error('Error fetching similar song:', err);
             }

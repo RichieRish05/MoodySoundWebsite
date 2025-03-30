@@ -4,21 +4,36 @@
     height: 390px;
     padding: 20px; /* Increase padding for more space */
     
-    /* Make the card semi-transparent */
-    opacity: 0.4;
+    /* Replace opacity with semi-transparent background */
+    background-color: rgba(255, 255, 255, 0.5); /* White with 0.4 opacity */
     
     /* Shift the card to the right by auto margin on the left */
     margin-left: auto;
     
     /* Optional: additional styling */
     max-width: 90%;  /* Prevents the card from stretching too far */
-    padding: 20px;
-    border: 1px solid #ccc;
     border-radius: 8px;
-    background-color: #fff;
   }
 
 .hidden {
     display: none;
 }
   
+.reccomended-song-cover-w-buttons {
+  width: 20%;  /* Fixed width instead of percentage */
+  height: auto; /* Fixed height to maintain square aspect ratio */
+  border-radius: 10px;
+  object-fit: cover; /* Ensures the image covers the fixed space properly */
+}
+
+.reccomended-song-cover-no-buttons {
+  width: 35%;  /* Fixed width instead of percentage */
+  height: auto; /* Fixed height to maintain square aspect ratio */
+  border-radius: 10px;
+  object-fit: cover; /* Ensures the image covers the fixed space properly */
+}
+
+
+.reccomendation-button {
+  background-color: rgba(255, 255, 255, 0.4)
+}
