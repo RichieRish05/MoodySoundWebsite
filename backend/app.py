@@ -17,14 +17,18 @@ WEIGHTS_PATH = os.path.join(os.path.dirname(__file__), os.getenv('WEIGHTS_PATH')
 if not os.path.exists(WEIGHTS_PATH):
     services.download_weights()
 
-# Init the model
-model = None
+class ModelManager:
+    def __init__(self):
+        self._model = None
+    
+    @property
+    def model(self):
+        if self._model is None:
+            self._model = services.load_model(WEIGHTS_PATH)
+        return self._model
 
-def get_model():
-    global model
-    if model is None:
-        model = services.load_model(WEIGHTS_PATH)
-    return model
+# Create the model manager as part of the app
+model_manager = ModelManager()
 
 @app.get('/hello')
 def hello():
@@ -32,8 +36,8 @@ def hello():
 
 @app.get('/mood')
 def predict_mood():
-    # Get the model lazily
-    model = get_model()
+    # Get the model through the manager
+    model = model_manager.model
     
     # Get the artist
     artist = request.args.get('artist')

@@ -3,7 +3,7 @@ import datetime
 import csv
 
 # Create the DynamoDB resource 
-dynamodb = boto3.resource('dynamodb')
+dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
 
 def enforce_keys(item):
     """

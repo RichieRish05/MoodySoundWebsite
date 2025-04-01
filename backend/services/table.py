@@ -3,12 +3,8 @@ from dotenv import load_dotenv
 import os 
 import random
 
-
-
-dynamodb = boto3.resource('dynamodb')
-
-
-
+# Initialize DynamoDB resource once at module level
+dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
 
 def select_song_that_matches_mood(table_name, significant_moods):
     """
