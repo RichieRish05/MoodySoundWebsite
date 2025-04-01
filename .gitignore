@@ -7,7 +7,7 @@ myenv
 *.env
 
 # Ignore all pth files
-*.pth
+#*.pth
 
 # Ignore all pycache files
 __pycache__

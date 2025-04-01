@@ -21,8 +21,7 @@ class ModelManager:
     def __init__(self):
         self._model = None
     
-    @property
-    def model(self):
+    def get_model(self):
         if self._model is None:
             self._model = services.load_model(WEIGHTS_PATH)
         return self._model
@@ -36,8 +35,8 @@ def hello():
 
 @app.get('/mood')
 def predict_mood():
-    # Get the model through the manager
-    model = model_manager.model
+    # Get the model lazily
+    model = model_manager.get_model()
     
     # Get the artist
     artist = request.args.get('artist')
@@ -152,6 +151,6 @@ def get_similar_song():
 
 
 if __name__ == '__main__':
-    port = 800
+    port = 8000
     app.run(host='0.0.0.0', port=port)
     
