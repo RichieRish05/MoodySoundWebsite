@@ -10,9 +10,16 @@ from dotenv import load_dotenv
 
 app = Flask(__name__)
 CORS(app)
+load_dotenv()
+
+# Check for model weights and download if needed
+WEIGHTS_PATH = os.path.join(os.path.dirname(__file__), os.getenv('WEIGHTS_PATH'))
+if not os.path.exists(WEIGHTS_PATH):
+    services.download_weights()
 
 # Init the model
-model = services.load_model()
+model = services.load_model(WEIGHTS_PATH)
+
 
 @app.get('/hello')
 def hello():
@@ -107,19 +114,21 @@ def get_similar_song():
     if len(moods) == 1 and moods[0] == 'danceable':
         moods = ['mood_party']
     song = services.select_song_that_matches_mood(os.getenv('QUERY_TABLE_NAME'), moods)
+    
+    if not song:
+        return jsonify({'error': 'No matched song'}), 400
+        
     spotify_info = services.get_track_album_cover_by_search(song['title'], song['artist'])
     
-
-    if song:
+    if spotify_info:
         return jsonify({
             'title': song['title'],
             'artist': song['artist'],
             'albumCover': spotify_info['album_cover'],
             'url': spotify_info['url']
         }), 200
-
-
-    return jsonify({'error': 'No matched song'}), 400
+    
+    return jsonify({'error': 'Could not fetch song information'}), 400
 
 
     
@@ -131,5 +140,4 @@ def get_similar_song():
 
 
 if __name__ == '__main__':
-    load_dotenv()
     app.run(host='0.0.0.0', port=8000, debug=True)

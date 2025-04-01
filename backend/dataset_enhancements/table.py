@@ -1,5 +1,4 @@
 import boto3
-from boto3.dynamodb.conditions import Attr
 import datetime
 import csv
 
@@ -164,7 +163,7 @@ if __name__ == '__main__':
     # delete_all_items('moodysoundcsv')
     # delete_all_items('moodysoundqueries')
     scan_table('moodysoundcsv')
-    # scan_table('moodysoundqueries')
+    #scan_table('moodysoundqueries')
     # mood = "party, danceable, mood_happy"
     # print(create_mood_search(mood))
     #export_table_to_s3_as_csv('moodysoundcsv')
