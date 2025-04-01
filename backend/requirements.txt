@@ -9,5 +9,7 @@ requests
 webcolors
 boto3
 spotipy
+python-dotenv
+gunicorn
 
 
