@@ -18,8 +18,13 @@ if not os.path.exists(WEIGHTS_PATH):
     services.download_weights()
 
 # Init the model
-model = services.load_model(WEIGHTS_PATH)
+model = None
 
+def get_model():
+    global model
+    if model is None:
+        model = services.load_model(WEIGHTS_PATH)
+    return model
 
 @app.get('/hello')
 def hello():
@@ -27,6 +32,9 @@ def hello():
 
 @app.get('/mood')
 def predict_mood():
+    # Get the model lazily
+    model = get_model()
+    
     # Get the artist
     artist = request.args.get('artist')
     song = request.args.get('song')
@@ -142,3 +150,4 @@ def get_similar_song():
 if __name__ == '__main__':
     port = 800
     app.run(host='0.0.0.0', port=port)
+    
