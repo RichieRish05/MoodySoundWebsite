@@ -17,6 +17,8 @@
     cursor: move;  /* Shows a move cursor on hover */
     user-select: none;  /* Prevents text selection while dragging */
     touch-action: none;  /* Improves touch interaction */
+    z-index: 1;  /* Sets the z-index to 1 */
+    position: relative;  /* Added positioning */
 }
 
 

@@ -1,9 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
 .page-content {
     display: flex;
     justify-content: flex-start; /* Align children to the start (left) */
     align-items: flex-start;
     gap: 20px; /* Optional: Adds space between the two sections */
   }
+
+body {
+    font-family: 'Roboto', sans-serif; /* Apply the imported font to the body */
+}
   
 
   

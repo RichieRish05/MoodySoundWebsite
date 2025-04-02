@@ -5,6 +5,7 @@ import './CallbackPage.css';
 import RankingBoard from '../../components/RankingBoard/RankingBoard';
 import RecommendationsCard from '../../components/RecommendationsCard/RecommendationsCard';
 import AlbumDisplay from '../../components/AlbumDisplay/AlbumDisplay';
+import Starfield from '../../components/Starfield/Starfield';
 
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL
@@ -217,6 +218,7 @@ const CallbackPage: React.FC = () => {
 
     return (
         <div>
+            <Starfield/>
             <h1 className='mb-5'>Welcome</h1>
             <div className="page-content">
 
@@ -228,7 +230,7 @@ const CallbackPage: React.FC = () => {
                         mood={mood}
                         />}
                 
-                {!playbackState ? <h1>Play A Song To Get Started</h1> : ''}
+                {!playbackState ? <h2>Play A Song To Get Started</h2> : ''}
 
                 </div>
 
