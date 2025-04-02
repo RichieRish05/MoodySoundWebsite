@@ -73,21 +73,29 @@ def get_items(table):
 
 def scan_table(table_name):
     """
-    Function to scan all elements in the table
+    Function to scan all elements in the table and count moods
     """
     table = dynamodb.Table(table_name)
     count = 0
+    mood_count = {}  # Dictionary to hold mood counts
     
     # Retrieve all items in the table
     items = get_items(table)
     
-    # Print out the items
+    # Print out the items and count moods
     print(f"Items in table {table_name}:")
     for item in items:
-        count += 1
-        print(item)
+        mood = item['dominant_mood']
+        if mood not in mood_count:
+            mood_count[mood] = 0
+        mood_count[mood] += 1
 
-    print(f'Count: {count}')
+        
+    
+    # Print mood counts
+    print("Mood counts:")
+    for mood, cnt in mood_count.items():
+        print(f"{mood}: {cnt}")
     
     return items
 
@@ -118,6 +126,12 @@ def export_table_to_s3_as_csv(table_name):
         writer.writeheader()
         for item in items:
             writer.writerow(item)
+
+    s3.upload_file(
+        Filename='/Users/rishi/MoodySoundWebsite/backend/dataset_enhancements/metadata.csv',
+        Key='data/metadata.csv',
+        Bucket='usercorrectedmoods'
+    )
 
 
 def delete_item(table_name, key):
@@ -162,10 +176,10 @@ __all__ = [write_to_table.__name__]
 if __name__ == '__main__':
     # delete_all_items('moodysoundcsv')
     # delete_all_items('moodysoundqueries')
-    scan_table('moodysoundcsv')
+    #scan_table('moodysoundcsv')
     #scan_table('moodysoundqueries')
     # mood = "party, danceable, mood_happy"
     # print(create_mood_search(mood))
-    #export_table_to_s3_as_csv('moodysoundcsv')
+    export_table_to_s3_as_csv('moodysoundcsv')
 
 

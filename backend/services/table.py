@@ -16,7 +16,7 @@ def select_song_that_matches_mood(table_name, significant_moods):
         response = table.query(
             IndexName='DominantMoodIndex',
             KeyConditionExpression='dominant_mood = :mood',
-            Limit=100,  # Get a batch of songs to choose from
+            Limit=200,  # Get a batch of songs to choose from
             ExpressionAttributeValues={
                 ':mood': mood
             }
