@@ -57,7 +57,7 @@ const RecommendationsCard: React.FC<RecommendationsCardProps> = ({hideRankingBoa
           <button onClick={onNo} className={`reccomendation-button ${!buttonsVisible ? 'hidden' : ''}`}>No</button>
         </div>
       ) : 
-      <h1>Thank You!</h1>}
+      <h1>Keep Jamming!</h1>}
     </div>
   );
 };

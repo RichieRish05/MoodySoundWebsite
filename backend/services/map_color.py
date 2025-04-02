@@ -6,12 +6,12 @@ from webcolors import rgb_to_hex
 # Define mood colors (RGB format)
 MOOD_COLORS = {
     "danceable":       (147,  51, 255),  # Bright Purple
-    "mood_acoustic":   ( 41, 128, 185),  # Bright Orange
+    "mood_acoustic":   ( 34, 139,  34),  # Forest Green
     "mood_aggressive": (255,   0,   0),  # Pure Red
-    "mood_electronic": (255, 136,   0),  # Turquoise
+    "mood_electronic": (0, 255, 255),    # Cyan
     "mood_happy":      (255, 221,   0),  # Golden Yellow
-    "mood_party":      (255,   0, 255),  # Hot Pink
-    "mood_relaxed":    ( 76, 217,  76),  # Lime Green
+    "mood_party":      (255,   20, 147), # Deep Pink
+    "mood_relaxed":    (72, 61, 139),      # Dark Green
     "mood_sad":        (  0, 128, 255),  # Bright Blue
 }
 

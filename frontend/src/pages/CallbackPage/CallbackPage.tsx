@@ -144,15 +144,15 @@ const CallbackPage: React.FC = () => {
                         vector: res.data.vector
                     });
                     setColor(res.data.color);
-                    setRecSong(null);
                     setShowRecButtons(true);
-                    setRecBoardKey(prev => prev + 1)
+                    setRecBoardKey(prev => prev + 1);
                     return res.data;
                 })
                 .catch((err) => {
                     setRetrievalError(true);
                     setMood(null);
                     setColor("#FFFFFF");
+                    setRecSong(null);
                     setShowRecButtons(false);
                     setRecBoardKey(prev => prev + 1)
                     console.error(err)
