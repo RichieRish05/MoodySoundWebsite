@@ -144,6 +144,7 @@ const CallbackPage: React.FC = () => {
                         vector: res.data.vector
                     });
                     setColor(res.data.color);
+                    setRecSong(null);
                     setShowRecButtons(true);
                     setRecBoardKey(prev => prev + 1)
                     return res.data;
